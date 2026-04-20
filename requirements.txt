@@ -1,0 +1,5 @@
+streamlit
+moviepy
+pillow
+edge-tts
+openai
