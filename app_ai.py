@@ -1,201 +1,97 @@
 import streamlit as st
-import ollama
+from openai import OpenAI
 from gtts import gTTS
 import tempfile
 
-from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
-from PIL import Image, ImageDraw, ImageFont
-from docx import Document
+# 🔐 Read API key from Streamlit Secrets
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.title("🎬 Summary Video Agent (TXT + DOCX Supported)")
+st.set_page_config(page_title="AI Coding Mentor", layout="centered")
 
-# ---------------------------
-# 📄 READ DOCX
-# ---------------------------
-def read_docx(file):
-    doc = Document(file)
-    text = []
-    for para in doc.paragraphs:
-        if para.text.strip():
-            text.append(para.text)
-    return "\n".join(text)
-
+st.title("💻 Smart Coding Mentor AI 🚀")
+st.write("Ask coding, concept, or debugging questions (Java, React, Python, etc.)")
 
 # ---------------------------
-# 🧠 AI FUNCTIONS
+# 🎙️ Audio function
 # ---------------------------
-def generate_summary(text):
-    return ollama.chat(
-        model='llama3',
-        messages=[{
-            'role': 'user',
-            'content': f"""
-Summarize ALL content clearly.
+def generate_audio(text):
+    clean_text = (
+        text.replace("`", "")
+        .replace("*", "")
+        .replace("#", "")
+    )
+    tts = gTTS(clean_text)
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    tts.save(temp_file.name)
+    return temp_file.name
 
-- Use all information
-- Simple English
-- Keep key points
 
-{text}
+# ---------------------------
+# 🧠 System Prompt
+# ---------------------------
+SYSTEM_PROMPT = """
+You are an AI coding mentor.
+
+You can answer:
+- Programming questions (Java, React, Python, etc.)
+- Conceptual questions
+- Debugging problems
+- Real-world scenarios
+
+Guidelines:
+- Use simple English
+- Be clear and structured
+- If coding → give code + explanation
+- If concept → explain with examples
+- If debugging → explain error + fix
+- Keep it beginner friendly
 """
-        }]
-    )['message']['content']
 
+# ---------------------------
+# 💬 Multi-line input
+# ---------------------------
+user_input = st.text_area(
+    "Ask your question:",
+    height=180,
+    placeholder="""Example:
 
-def generate_slides(summary):
-    return ollama.chat(
-        model='llama3',
-        messages=[{
-            'role': 'user',
-            'content': f"""
-Create slides in EXACT format:
+Explain why this React code is not updating:
 
-### Title: Topic
-Point one
-Point two
+const [count, setCount] = useState(0);
 
-Rules:
-- No symbols
-- No numbering
-- Simple language
-- Create 4 slides
-
-{summary}
+setCount(count + 1);
+setCount(count + 1);
 """
-        }]
-    )['message']['content']
-
-
-def parse_slides(text):
-    raw = text.split("### Title:")
-    slides = []
-
-    for block in raw:
-        if not block.strip():
-            continue
-
-        lines = block.strip().split("\n")
-        title = lines[0]
-        content = "\n".join(lines[1:])
-
-        slides.append((title, content))
-
-    return slides
-
-
-def clean_text(text):
-    return text.replace('"', '').replace("'", '').replace("*", '').replace("`", '')
-
-
-# ---------------------------
-# 🎨 SLIDE CREATION
-# ---------------------------
-def create_slide_image(title, content):
-    img = Image.new("RGB", (1280, 720), "white")
-    draw = ImageDraw.Draw(img)
-
-    try:
-        font_title = ImageFont.truetype("arial.ttf", 60)
-        font_content = ImageFont.truetype("arial.ttf", 40)
-    except:
-        font_title = ImageFont.load_default()
-        font_content = ImageFont.load_default()
-
-    draw.text((100, 50), title, fill="black", font=font_title)
-
-    y = 180
-    for line in content.split("\n"):
-        draw.text((120, y), line.strip(), fill="black", font=font_content)
-        y += 70
-
-    path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-    img.save(path)
-    return path
-
-
-# ---------------------------
-# 🎬 VIDEO GENERATION
-# ---------------------------
-def generate_video(slides_text):
-    slides = parse_slides(slides_text)
-    clips = []
-
-    for title, content in slides:
-
-        explanation = ollama.chat(
-            model='llama3',
-            messages=[{
-                'role': 'user',
-                'content': f"""
-Explain clearly in simple English.
-
-Topic:
-{title}
-{content}
-"""
-            }]
-        )['message']['content']
-
-        explanation = clean_text(explanation)
-
-        # Audio
-        tts = gTTS(explanation)
-        audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-        tts.save(audio_file)
-
-        audio = AudioFileClip(audio_file)
-
-        # Slide
-        img = create_slide_image(title, content)
-
-        clip = ImageClip(img).with_duration(audio.duration)
-        clip = clip.with_audio(audio)
-
-        clips.append(clip)
-
-    video = concatenate_videoclips(clips, method="compose")
-
-    video_path = "final_video.mp4"
-    video.write_videofile(video_path, fps=12)
-
-    return video_path
-
-
-# ---------------------------
-# 📥 UI
-# ---------------------------
-uploaded_files = st.file_uploader(
-    "Upload TXT or DOCX files",
-    type=["txt", "docx"],
-    accept_multiple_files=True
 )
 
-if st.button("Generate Video"):
+# ---------------------------
+# 🚀 Generate Answer
+# ---------------------------
+if st.button("Generate Answer"):
 
-    if not uploaded_files:
-        st.warning("Upload files first")
+    if user_input.strip() == "":
+        st.warning("Please enter a question")
     else:
-        with st.spinner("Processing..."):
+        with st.spinner("Thinking... 🤖"):
 
-            texts = []
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": user_input}
+                    ]
+                )
 
-            for f in uploaded_files:
+                answer = response.choices[0].message.content
 
-                if f.name.endswith(".txt"):
-                    texts.append(f.read().decode("utf-8"))
+                # 📘 Output
+                st.subheader("📘 Explanation")
+                st.write(answer)
 
-                elif f.name.endswith(".docx"):
-                    texts.append(read_docx(f))
+                # 🎙️ Audio
+                audio_file = generate_audio(answer)
+                st.audio(audio_file)
 
-            full_text = "\n\n---\n\n".join(texts)
-
-            summary = generate_summary(full_text)
-            slides = generate_slides(summary)
-
-            st.subheader("Summary")
-            st.write(summary)
-
-            video_path = generate_video(slides)
-
-            st.success("Video generated!")
-            st.video(video_path)
+            except Exception as e:
+                st.error(f"Error: {e}")
