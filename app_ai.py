@@ -1,28 +1,31 @@
 import streamlit as st
-import ollama
 import tempfile
 import json
 import asyncio
 
+from openai import OpenAI
 import edge_tts
 from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
-st.title("🎬 Fast AI Transcript → Video Generator")
+st.title("🎬 AI Transcript → Video Generator (Cloud Ready)")
 
 # ---------------------------
-# 🧠 OLLAMA CALL
+# 🔑 OPENAI CLIENT
 # ---------------------------
-def call_ollama(prompt):
-    try:
-        res = ollama.chat(
-            model="llama3",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return res["message"]["content"]
-    except Exception as e:
-        return f"Error: {e}"
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# ---------------------------
+# 🧠 CALL OPENAI
+# ---------------------------
+def call_ai(prompt):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+    )
+    return response.choices[0].message.content
 
 # ---------------------------
 # 🧹 CLEAN JSON
@@ -36,7 +39,7 @@ def clean_json(text):
 # 🧠 SINGLE AI CALL
 # ---------------------------
 def generate_all(text):
-    raw = call_ollama(f"""
+    raw = call_ai(f"""
 You are a teaching assistant.
 
 Task:
@@ -75,7 +78,6 @@ TEXT:
         raw = clean_json(raw)
         return json.loads(raw)
     except:
-        print("RAW OUTPUT:\n", raw)
         return None
 
 # ---------------------------
@@ -114,14 +116,12 @@ def generate_audio(text):
     return path
 
 # ---------------------------
-# 🎬 CREATE CLIP (FIXED)
+# 🎬 CREATE CLIP
 # ---------------------------
 def create_clip(img_path, audio_path):
     audio = AudioFileClip(audio_path)
-
     clip = ImageClip(img_path).with_duration(audio.duration)
     clip = clip.with_audio(audio)
-
     return clip
 
 # ---------------------------
@@ -131,12 +131,8 @@ def generate_video(slides):
     clips = []
 
     for slide in slides:
-        title = slide["title"]
-        points = slide["points"]
-        explanation = slide["explanation"]
-
-        img = create_slide(title, points)
-        audio = generate_audio(explanation)
+        img = create_slide(slide["title"], slide["points"])
+        audio = generate_audio(slide["explanation"])
 
         clip = create_clip(img, audio)
         clips.append(clip)
@@ -168,21 +164,16 @@ if st.button("Generate Video"):
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
 
-        # 🧠 AI processing
         data = generate_all(merged)
 
         if not data:
             st.error("AI failed. Try again.")
             st.stop()
 
-        summary = data["summary"]
-        slides = data["slides"]
-
         st.subheader("📄 Summary")
-        st.write(summary)
+        st.write(data["summary"])
 
-        # 🎬 Video
-        video = generate_video(slides)
+        video = generate_video(data["slides"])
 
         st.success("✅ Video Ready!")
         st.video(video)
