@@ -8,16 +8,12 @@ import edge_tts
 from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 
-st.set_page_config(page_title="AI Video Generator", layout="centered")
-st.title("🎬 AI Transcript → Video Generator")
+st.title("🎬 Long Transcript → Video Generator")
 
-# ---------------------------
-# 🔑 OPENAI CLIENT
-# ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # ---------------------------
-# 🧠 CALL AI
+# 🧠 AI CALL
 # ---------------------------
 def call_ai(prompt):
     res = client.chat.completions.create(
@@ -28,34 +24,53 @@ def call_ai(prompt):
     return res.choices[0].message.content
 
 # ---------------------------
-# 🧹 CLEAN JSON
+# ✂️ SPLIT TEXT
 # ---------------------------
-def clean_json(text):
-    start = text.find("{")
-    end = text.rfind("}") + 1
-    return text[start:end]
+def split_text(text, size=3000):
+    return [text[i:i+size] for i in range(0, len(text), size)]
 
 # ---------------------------
-# 🧠 GENERATE CONTENT
+# 🧠 STEP 1: CHUNK SUMMARIES
+# ---------------------------
+def summarize_chunks(text):
+    chunks = split_text(text)
+    summaries = []
+
+    for chunk in chunks:
+        s = call_ai(f"""
+Summarize ALL important concepts.
+
+Rules:
+- Do NOT skip ideas
+- Simple English
+
+TEXT:
+{chunk}
+""")
+        summaries.append(s)
+
+    return "\n".join(summaries)
+
+# ---------------------------
+# 🧠 STEP 2: FINAL CONTENT
 # ---------------------------
 def generate_all(text):
     raw = call_ai(f"""
-You are a teaching assistant.
+You are a teacher.
 
-Task:
-1. Create COMPLETE summary (cover ALL concepts)
-2. Create slides
+GOAL:
+Create a 5-minute learning video script.
 
-Rules:
-- Simple English
-- Minimum 150 words summary
+RULES:
+- Use ALL concepts from input
+- Do NOT skip anything
+- 600–900 words explanation
 
-Slides:
-- 3 slides only (faster)
-- Max 4 points each
-- Add short explanation
+SLIDES:
+- 6–8 slides
+- Each explanation: 80–120 words
 
-Return ONLY JSON:
+RETURN JSON:
 
 {{
   "summary": "...",
@@ -73,12 +88,14 @@ TEXT:
 """)
 
     try:
-        return json.loads(clean_json(raw))
+        start = raw.find("{")
+        end = raw.rfind("}") + 1
+        return json.loads(raw[start:end])
     except:
         return None
 
 # ---------------------------
-# 🎨 SLIDE IMAGE
+# 🎨 SLIDE
 # ---------------------------
 def create_slide(title, points):
     img = Image.new("RGB", (1280, 720), "#222")
@@ -97,7 +114,7 @@ def create_slide(title, points):
     return path
 
 # ---------------------------
-# 🔊 TTS (SAFE)
+# 🔊 AUDIO
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(text, voice="en-US-AriaNeural")
@@ -107,7 +124,7 @@ def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
     try:
         asyncio.run(tts_async(text, path))
-    except RuntimeError:
+    except:
         loop = asyncio.new_event_loop()
         loop.run_until_complete(tts_async(text, path))
     return path
@@ -119,23 +136,16 @@ def generate_video(slides):
     clips = []
 
     for slide in slides:
-        try:
-            img = create_slide(slide["title"], slide["points"])
-            audio = generate_audio(slide["explanation"])
+        img = create_slide(slide["title"], slide["points"])
+        audio = generate_audio(slide["explanation"])
 
-            audio_clip = AudioFileClip(audio)
-            clip = ImageClip(img).with_duration(audio_clip.duration)
-            clip = clip.with_audio(audio_clip)
+        audio_clip = AudioFileClip(audio)
+        clip = ImageClip(img).with_duration(audio_clip.duration)
+        clip = clip.with_audio(audio_clip)
 
-            clips.append(clip)
+        clips.append(clip)
 
-        except:
-            continue
-
-    if not clips:
-        return None
-
-    final = concatenate_videoclips(clips, method="compose")
+    final = concatenate_videoclips(clips)
 
     output = "video.mp4"
     final.write_videofile(output, fps=12, preset="ultrafast")
@@ -143,31 +153,28 @@ def generate_video(slides):
     return output
 
 # ---------------------------
-# 📥 UI
+# UI
 # ---------------------------
 files = st.file_uploader("Upload transcripts", type=["txt"], accept_multiple_files=True)
 
 if st.button("Generate Video"):
 
-    if not files:
-        st.warning("Upload files")
-        st.stop()
-
     texts = [f.read().decode("utf-8") for f in files]
     merged = "\n\n".join(texts)
 
-    data = generate_all(merged)
+    st.write("🔄 Step 1: Processing chunks...")
+    chunk_summary = summarize_chunks(merged)
+
+    st.write("🔄 Step 2: Creating final content...")
+    data = generate_all(chunk_summary)
 
     if not data:
-        st.error("AI failed")
+        st.error("Failed")
         st.stop()
 
-    st.subheader("Summary")
     st.write(data["summary"])
 
+    st.write("🎬 Generating video...")
     video = generate_video(data["slides"])
 
-    if video:
-        st.video(video)
-    else:
-        st.error("Video failed")
+    st.video(video)
