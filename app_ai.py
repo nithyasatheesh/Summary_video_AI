@@ -1,179 +1,201 @@
 import streamlit as st
+import ollama
+from gtts import gTTS
 import tempfile
-import json
-import asyncio
 
-from openai import OpenAI
-import edge_tts
 from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
+from docx import Document
 
-st.set_page_config(page_title="AI Video Generator", layout="centered")
-st.title("🎬 AI Transcript → Video Generator (Cloud Ready)")
-
-# ---------------------------
-# 🔑 OPENAI CLIENT
-# ---------------------------
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+st.title("🎬 Summary Video Agent (TXT + DOCX Supported)")
 
 # ---------------------------
-# 🧠 CALL OPENAI
+# 📄 READ DOCX
 # ---------------------------
-def call_ai(prompt):
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3,
-    )
-    return response.choices[0].message.content
+def read_docx(file):
+    doc = Document(file)
+    text = []
+    for para in doc.paragraphs:
+        if para.text.strip():
+            text.append(para.text)
+    return "\n".join(text)
 
-# ---------------------------
-# 🧹 CLEAN JSON
-# ---------------------------
-def clean_json(text):
-    start = text.find("{")
-    end = text.rfind("}") + 1
-    return text[start:end]
 
 # ---------------------------
-# 🧠 SINGLE AI CALL
+# 🧠 AI FUNCTIONS
 # ---------------------------
-def generate_all(text):
-    raw = call_ai(f"""
-You are a teaching assistant.
+def generate_summary(text):
+    return ollama.chat(
+        model='llama3',
+        messages=[{
+            'role': 'user',
+            'content': f"""
+Summarize ALL content clearly.
 
-Task:
-1. Create a COMPLETE summary (cover ALL concepts)
-2. Create slides
+- Use all information
+- Simple English
+- Keep key points
 
-STRICT RULES:
-- Do NOT skip important ideas
-- Use simple English
-- Minimum summary length: 150 words
-
-Slides:
-- 4 to 5 slides
-- Max 4 points each
-- Add short explanation per slide
-
-RETURN ONLY VALID JSON
-
-Format:
-{{
-  "summary": "...",
-  "slides": [
-    {{
-      "title": "...",
-      "points": ["...", "..."],
-      "explanation": "..."
-    }}
-  ]
-}}
-
-TEXT:
 {text}
-""")
+"""
+        }]
+    )['message']['content']
+
+
+def generate_slides(summary):
+    return ollama.chat(
+        model='llama3',
+        messages=[{
+            'role': 'user',
+            'content': f"""
+Create slides in EXACT format:
+
+### Title: Topic
+Point one
+Point two
+
+Rules:
+- No symbols
+- No numbering
+- Simple language
+- Create 4 slides
+
+{summary}
+"""
+        }]
+    )['message']['content']
+
+
+def parse_slides(text):
+    raw = text.split("### Title:")
+    slides = []
+
+    for block in raw:
+        if not block.strip():
+            continue
+
+        lines = block.strip().split("\n")
+        title = lines[0]
+        content = "\n".join(lines[1:])
+
+        slides.append((title, content))
+
+    return slides
+
+
+def clean_text(text):
+    return text.replace('"', '').replace("'", '').replace("*", '').replace("`", '')
+
+
+# ---------------------------
+# 🎨 SLIDE CREATION
+# ---------------------------
+def create_slide_image(title, content):
+    img = Image.new("RGB", (1280, 720), "white")
+    draw = ImageDraw.Draw(img)
 
     try:
-        raw = clean_json(raw)
-        return json.loads(raw)
+        font_title = ImageFont.truetype("arial.ttf", 60)
+        font_content = ImageFont.truetype("arial.ttf", 40)
     except:
-        return None
+        font_title = ImageFont.load_default()
+        font_content = ImageFont.load_default()
 
-# ---------------------------
-# 🎨 SLIDE IMAGE
-# ---------------------------
-def create_slide(title, points):
-    img = Image.new("RGB", (1280, 720), "#f5f5f5")
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.load_default()
+    draw.text((100, 50), title, fill="black", font=font_title)
 
-    draw.text((50, 40), title, fill="black", font=font)
-    draw.line((50, 100, 1200, 100), fill="black", width=2)
-
-    y = 150
-    for p in points:
-        draw.text((80, y), f"• {p}", fill="black", font=font)
-        y += 50
+    y = 180
+    for line in content.split("\n"):
+        draw.text((120, y), line.strip(), fill="black", font=font_content)
+        y += 70
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
-# ---------------------------
-# 🔊 EDGE TTS
-# ---------------------------
-async def tts_async(text, path):
-    communicate = edge_tts.Communicate(
-        text=text,
-        voice="en-US-AriaNeural"
-    )
-    await communicate.save(path)
-
-def generate_audio(text):
-    path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-    asyncio.run(tts_async(text, path))
-    return path
 
 # ---------------------------
-# 🎬 CREATE CLIP
+# 🎬 VIDEO GENERATION
 # ---------------------------
-def create_clip(img_path, audio_path):
-    audio = AudioFileClip(audio_path)
-    clip = ImageClip(img_path).with_duration(audio.duration)
-    clip = clip.with_audio(audio)
-    return clip
-
-# ---------------------------
-# 🎥 GENERATE VIDEO
-# ---------------------------
-def generate_video(slides):
+def generate_video(slides_text):
+    slides = parse_slides(slides_text)
     clips = []
 
-    for slide in slides:
-        img = create_slide(slide["title"], slide["points"])
-        audio = generate_audio(slide["explanation"])
+    for title, content in slides:
 
-        clip = create_clip(img, audio)
+        explanation = ollama.chat(
+            model='llama3',
+            messages=[{
+                'role': 'user',
+                'content': f"""
+Explain clearly in simple English.
+
+Topic:
+{title}
+{content}
+"""
+            }]
+        )['message']['content']
+
+        explanation = clean_text(explanation)
+
+        # Audio
+        tts = gTTS(explanation)
+        audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
+        tts.save(audio_file)
+
+        audio = AudioFileClip(audio_file)
+
+        # Slide
+        img = create_slide_image(title, content)
+
+        clip = ImageClip(img).with_duration(audio.duration)
+        clip = clip.with_audio(audio)
+
         clips.append(clip)
 
-    final = concatenate_videoclips(clips, method="compose")
+    video = concatenate_videoclips(clips, method="compose")
 
-    output = "final_video.mp4"
-    final.write_videofile(output, fps=12, preset="ultrafast")
+    video_path = "final_video.mp4"
+    video.write_videofile(video_path, fps=12)
 
-    return output
+    return video_path
+
 
 # ---------------------------
 # 📥 UI
 # ---------------------------
-files = st.file_uploader(
-    "Upload transcript files",
-    type=["txt"],
+uploaded_files = st.file_uploader(
+    "Upload TXT or DOCX files",
+    type=["txt", "docx"],
     accept_multiple_files=True
 )
 
 if st.button("Generate Video"):
 
-    if not files:
+    if not uploaded_files:
         st.warning("Upload files first")
-        st.stop()
+    else:
+        with st.spinner("Processing..."):
 
-    with st.spinner("Processing..."):
+            texts = []
 
-        texts = [f.read().decode("utf-8") for f in files]
-        merged = "\n\n".join(texts)
+            for f in uploaded_files:
 
-        data = generate_all(merged)
+                if f.name.endswith(".txt"):
+                    texts.append(f.read().decode("utf-8"))
 
-        if not data:
-            st.error("AI failed. Try again.")
-            st.stop()
+                elif f.name.endswith(".docx"):
+                    texts.append(read_docx(f))
 
-        st.subheader("📄 Summary")
-        st.write(data["summary"])
+            full_text = "\n\n---\n\n".join(texts)
 
-        video = generate_video(data["slides"])
+            summary = generate_summary(full_text)
+            slides = generate_slides(summary)
 
-        st.success("✅ Video Ready!")
-        st.video(video)
+            st.subheader("Summary")
+            st.write(summary)
+
+            video_path = generate_video(slides)
+
+            st.success("Video generated!")
+            st.video(video_path)
