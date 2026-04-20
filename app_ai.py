@@ -1,188 +1,98 @@
 import streamlit as st
-import ollama
+from openai import OpenAI
+from gtts import gTTS
 import tempfile
-import json
-import asyncio
 
-import edge_tts
-from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
-from PIL import Image, ImageDraw, ImageFont
+# 🔐 Use Streamlit secrets
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.set_page_config(page_title="AI Video Generator", layout="centered")
-st.title("🎬 Fast AI Transcript → Video Generator")
+st.set_page_config(page_title="AI Coding Mentor", layout="centered")
 
-# ---------------------------
-# 🧠 OLLAMA CALL
-# ---------------------------
-def call_ollama(prompt):
-    try:
-        res = ollama.chat(
-            model="llama3",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return res["message"]["content"]
-    except Exception as e:
-        return f"Error: {e}"
+st.title("💻 AI Coding Mentor 🚀")
+st.write("Ask coding, concept, or debugging questions (Java, React, Python, etc.)")
 
 # ---------------------------
-# 🧹 CLEAN JSON
+# 🎙️ Audio function
 # ---------------------------
-def clean_json(text):
-    start = text.find("{")
-    end = text.rfind("}") + 1
-    return text[start:end]
-
-# ---------------------------
-# 🧠 SINGLE AI CALL
-# ---------------------------
-def generate_all(text):
-    raw = call_ollama(f"""
-You are a teaching assistant.
-
-Task:
-1. Create a COMPLETE summary (cover ALL concepts)
-2. Create slides
-
-STRICT RULES:
-- Do NOT skip important ideas
-- Use simple English
-- Minimum summary length: 150 words
-
-Slides:
-- 4 to 5 slides
-- Max 4 points each
-- Add short explanation per slide
-
-RETURN ONLY VALID JSON
-
-Format:
-{{
-  "summary": "...",
-  "slides": [
-    {{
-      "title": "...",
-      "points": ["...", "..."],
-      "explanation": "..."
-    }}
-  ]
-}}
-
-TEXT:
-{text}
-""")
-
-    try:
-        raw = clean_json(raw)
-        return json.loads(raw)
-    except:
-        print("RAW OUTPUT:\n", raw)
-        return None
-
-# ---------------------------
-# 🎨 SLIDE IMAGE
-# ---------------------------
-def create_slide(title, points):
-    img = Image.new("RGB", (1280, 720), "#f5f5f5")
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.load_default()
-
-    draw.text((50, 40), title, fill="black", font=font)
-    draw.line((50, 100, 1200, 100), fill="black", width=2)
-
-    y = 150
-    for p in points:
-        draw.text((80, y), f"• {p}", fill="black", font=font)
-        y += 50
-
-    path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-    img.save(path)
-    return path
-
-# ---------------------------
-# 🔊 EDGE TTS
-# ---------------------------
-async def tts_async(text, path):
-    communicate = edge_tts.Communicate(
-        text=text,
-        voice="en-US-AriaNeural"
-    )
-    await communicate.save(path)
-
 def generate_audio(text):
-    path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-    asyncio.run(tts_async(text, path))
-    return path
+    clean_text = (
+        text.replace("`", "")
+        .replace("*", "")
+        .replace("#", "")
+    )
+
+    tts = gTTS(clean_text)
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    tts.save(temp_file.name)
+    return temp_file.name
+
 
 # ---------------------------
-# 🎬 CREATE CLIP (FIXED)
+# 🧠 System Prompt
 # ---------------------------
-def create_clip(img_path, audio_path):
-    audio = AudioFileClip(audio_path)
+SYSTEM_PROMPT = """
+You are an AI coding mentor.
 
-    clip = ImageClip(img_path).with_duration(audio.duration)
-    clip = clip.with_audio(audio)
+You can answer:
+- Programming questions (Java, React, Python, etc.)
+- Conceptual questions
+- Debugging problems
+- Real-world scenarios
 
-    return clip
-
-# ---------------------------
-# 🎥 GENERATE VIDEO
-# ---------------------------
-def generate_video(slides):
-    clips = []
-
-    for slide in slides:
-        title = slide["title"]
-        points = slide["points"]
-        explanation = slide["explanation"]
-
-        img = create_slide(title, points)
-        audio = generate_audio(explanation)
-
-        clip = create_clip(img, audio)
-        clips.append(clip)
-
-    final = concatenate_videoclips(clips, method="compose")
-
-    output = "final_video.mp4"
-    final.write_videofile(output, fps=12, preset="ultrafast")
-
-    return output
+Guidelines:
+- Use simple English
+- Be clear and structured
+- If coding → give code + explanation
+- If concept → explain with examples
+- If debugging → explain error + fix
+- Keep it beginner friendly
+"""
 
 # ---------------------------
-# 📥 UI
+# 💬 MULTI-LINE INPUT (FIXED)
 # ---------------------------
-files = st.file_uploader(
-    "Upload transcript files",
-    type=["txt"],
-    accept_multiple_files=True
+user_input = st.text_area(
+    "Ask your question:",
+    height=180,
+    placeholder="""Example:
+
+Explain why this React code is not updating:
+
+const [count, setCount] = useState(0);
+
+setCount(count + 1);
+setCount(count + 1);
+"""
 )
 
-if st.button("Generate Video"):
+# ---------------------------
+# 🚀 Generate Answer
+# ---------------------------
+if st.button("Generate Answer"):
 
-    if not files:
-        st.warning("Upload files first")
-        st.stop()
+    if user_input.strip() == "":
+        st.warning("Please enter a question")
+    else:
+        with st.spinner("Thinking... 🤖"):
 
-    with st.spinner("Processing..."):
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": user_input}
+                    ]
+                )
 
-        texts = [f.read().decode("utf-8") for f in files]
-        merged = "\n\n".join(texts)
+                answer = response.choices[0].message.content
 
-        # 🧠 AI processing
-        data = generate_all(merged)
+                # 📘 Output
+                st.subheader("📘 Explanation")
+                st.write(answer)
 
-        if not data:
-            st.error("AI failed. Try again.")
-            st.stop()
+                # 🎙️ Audio
+                audio_file = generate_audio(answer)
+                st.audio(audio_file)
 
-        summary = data["summary"]
-        slides = data["slides"]
-
-        st.subheader("📄 Summary")
-        st.write(summary)
-
-        # 🎬 Video
-        video = generate_video(slides)
-
-        st.success("✅ Video Ready!")
-        st.video(video)
+            except Exception as e:
+                st.error(f"Error: {e}")
