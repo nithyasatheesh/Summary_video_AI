@@ -9,7 +9,7 @@ from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
-st.title("🎬 Long Transcript → Video Generator")
+st.title("🎬 Transcript → Video Generator")
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
