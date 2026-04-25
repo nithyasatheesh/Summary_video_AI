@@ -13,8 +13,8 @@ from PIL import Image, ImageDraw, ImageFont
 # ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.set_page_config(page_title="Fast AI Video Generator", layout="centered")
-st.title("⚡ Fast AI Transcript → Video Generator")
+st.set_page_config(page_title="AI Video Generator", layout="centered")
+st.title("🎬 AI Transcript → Clean Video")
 
 # ---------------------------
 # 🧠 OPENAI CALL
@@ -36,20 +36,20 @@ def clean_json(text):
     return text[start:end]
 
 # ---------------------------
-# 🧠 AI GENERATION (BETTER SLIDES)
+# 🧠 GENERATE CONTENT (GOOD SLIDES)
 # ---------------------------
 def generate_all(text):
     raw = call_openai(f"""
-Create clean presentation slides.
+Create presentation slides.
 
 RULES:
-- 5 to 6 slides only
-- Max 2 bullet points per slide
-- Each bullet under 6 words
-- Titles short (2–4 words)
-- Explanation short (max 25 words)
+- 5 slides only
+- Max 3 bullet points
+- Each bullet under 5 words
+- Titles: 2–3 words
+- Explanation short (max 20 words)
 
-Return JSON only:
+Return JSON:
 {{
   "summary": "...",
   "slides": [
@@ -64,41 +64,45 @@ Return JSON only:
 TEXT:
 {text}
 """)
+
     raw = clean_json(raw)
     return json.loads(raw)
 
 # ---------------------------
-# 🎨 CREATE SLIDE (BIG FONT)
+# 🎨 CREATE SLIDE (PRO DESIGN)
 # ---------------------------
 def create_slide(title, points):
-    img = Image.new("RGB", (1280, 720), "white")
+    img = Image.new("RGB", (1280, 720), "#fdfdfd")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("arial.ttf", 110)
-        point_font = ImageFont.truetype("arial.ttf", 70)
+        title_font = ImageFont.truetype("arial.ttf", 95)
+        point_font = ImageFont.truetype("arial.ttf", 58)
     except:
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    # Center title
-    w, h = draw.textbbox((0, 0), title, font=title_font)[2:]
-    draw.text(((1280 - w) // 2, 120), title, fill="black", font=title_font)
+    # TITLE (LEFT TOP)
+    draw.text((80, 80), title, fill="black", font=title_font)
 
-    # Bullets
-    y = 380
-    for p in points[:2]:
-        text = f"• {p}"
-        w, h = draw.textbbox((0, 0), text, font=point_font)[2:]
-        draw.text(((1280 - w) // 2, y), text, fill="black", font=point_font)
-        y += 140
+    # underline
+    draw.line((80, 200, 1200, 200), fill="black", width=3)
+
+    # BULLETS
+    y = 260
+    for p in points[:3]:
+        if len(p) > 35:
+            p = p[:35] + "..."
+
+        draw.text((120, y), f"• {p}", fill="black", font=point_font)
+        y += 110
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# 🔊 FAST TTS
+# 🔊 TTS
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
@@ -110,10 +114,9 @@ async def tts_async(text, path):
 def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
 
-    # shorter audio for speed
     short_text = text[:120]
-
     asyncio.run(tts_async(short_text, path))
+
     return path
 
 # ---------------------------
@@ -126,12 +129,12 @@ def create_clip(img_path, audio_path):
     return clip
 
 # ---------------------------
-# 🎥 FAST VIDEO
+# 🎥 VIDEO
 # ---------------------------
 def generate_video(slides):
     clips = []
 
-    for slide in slides[:6]:
+    for slide in slides[:5]:
         img = create_slide(slide["title"], slide["points"])
         audio = generate_audio(slide["explanation"])
 
@@ -155,7 +158,7 @@ def generate_video(slides):
 # 📥 UI
 # ---------------------------
 files = st.file_uploader(
-    "Upload transcript files",
+    "Upload transcript (.txt)",
     type=["txt"],
     accept_multiple_files=True
 )
@@ -166,7 +169,7 @@ if st.button("Generate Video"):
         st.warning("Upload files first")
         st.stop()
 
-    with st.spinner("⚡ Processing fast..."):
+    with st.spinner("⚡ Generating clean video..."):
 
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
