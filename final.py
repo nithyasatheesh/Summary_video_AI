@@ -4,7 +4,6 @@ import tempfile
 import json
 import asyncio
 import os
-import requests
 
 import edge_tts
 from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
@@ -18,25 +17,19 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 st.set_page_config(page_title="AI Video Generator", layout="centered")
 st.title("🎬 AI Transcript → Clean Video")
 
-FONT_PATH = "font.ttf"
+FONT_FILE = "Roboto-Bold.ttf"
 
 # ---------------------------
-# 📥 DOWNLOAD FONT (FIX)
-# ---------------------------
-def download_font():
-    if not os.path.exists(FONT_PATH):
-        url = "https://github.com/google/fonts/raw/main/apache/roboto/Roboto-Bold.ttf"
-        r = requests.get(url)
-        with open(FONT_PATH, "wb") as f:
-            f.write(r.content)
-
-# ---------------------------
-# 🔤 LOAD FONTS (REAL BIG)
+# 🔤 LOAD FONT (LOCAL ONLY)
 # ---------------------------
 def load_fonts():
-    download_font()
-    title_font = ImageFont.truetype(FONT_PATH, 140)  # 🔥 BIG
-    point_font = ImageFont.truetype(FONT_PATH, 80)   # 🔥 BIG
+    try:
+        title_font = ImageFont.truetype(FONT_FILE, 140)  # BIG
+        point_font = ImageFont.truetype(FONT_FILE, 80)
+    except Exception as e:
+        st.error(f"Font error: {e}")
+        title_font = ImageFont.load_default()
+        point_font = ImageFont.load_default()
     return title_font, point_font
 
 # ---------------------------
@@ -69,8 +62,8 @@ RULES:
 - 5 slides only
 - Max 2 bullet points
 - Each bullet under 4 words
-- Titles: 2–3 words only
-- Explanation short (max 15 words)
+- Titles: 2–3 words
+- Explanation max 15 words
 
 Return JSON:
 {{
@@ -99,13 +92,13 @@ def create_slide(title, points):
 
     title_font, point_font = load_fonts()
 
-    # TITLE
+    # Title
     draw.text((80, 80), title, fill="black", font=title_font)
 
     # underline
     draw.line((80, 240, 1200, 240), fill="black", width=5)
 
-    # BULLETS
+    # bullets
     y = 320
     for p in points[:2]:
         draw.text((120, y), f"• {p}", fill="black", font=point_font)
@@ -141,7 +134,7 @@ def create_clip(img_path, audio_path):
     return clip
 
 # ---------------------------
-# 🎥 VIDEO
+# 🎥 GENERATE VIDEO
 # ---------------------------
 def generate_video(slides):
     clips = []
@@ -181,7 +174,7 @@ if st.button("Generate Video"):
         st.warning("Upload files first")
         st.stop()
 
-    with st.spinner("⚡ Generating clean video..."):
+    with st.spinner("⚡ Generating video..."):
 
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
