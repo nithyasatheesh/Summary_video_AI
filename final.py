@@ -1,5 +1,5 @@
 import streamlit as st
-import ollama
+from openai import OpenAI
 import tempfile
 import json
 import asyncio
@@ -8,18 +8,24 @@ import edge_tts
 from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 
+# ---------------------------
+# 🔑 OPENAI CLIENT
+# ---------------------------
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 st.set_page_config(page_title="Fast AI Video Generator", layout="centered")
 st.title("⚡ Fast AI Transcript → Video Generator")
 
 # ---------------------------
-# 🧠 OLLAMA CALL
+# 🧠 OPENAI CALL
 # ---------------------------
-def call_ollama(prompt):
-    res = ollama.chat(
-        model="llama3",
-        messages=[{"role": "user", "content": prompt}]
+def call_openai(prompt):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7
     )
-    return res["message"]["content"]
+    return response.choices[0].message.content
 
 # ---------------------------
 # 🧹 CLEAN JSON
@@ -33,7 +39,7 @@ def clean_json(text):
 # 🧠 AI GENERATION
 # ---------------------------
 def generate_all(text):
-    raw = call_ollama(f"""
+    raw = call_openai(f"""
 Create summary + slides.
 
 Return JSON only:
@@ -55,10 +61,9 @@ TEXT:
     return json.loads(raw)
 
 # ---------------------------
-# 🎨 CREATE SLIDE (FAST)
+# 🎨 CREATE SLIDE
 # ---------------------------
 def create_slide(title, points):
-    # ⚡ Lower resolution = faster
     img = Image.new("RGB", (854, 480), "white")
     draw = ImageDraw.Draw(img)
 
@@ -69,7 +74,6 @@ def create_slide(title, points):
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    # Title
     draw.text((40, 20), title, fill="black", font=title_font)
 
     y = 100
@@ -82,7 +86,7 @@ def create_slide(title, points):
     return path
 
 # ---------------------------
-# 🔊 FAST TTS (SHORT)
+# 🔊 TTS
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
@@ -93,10 +97,7 @@ async def tts_async(text, path):
 
 def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-
-    # ⚡ limit audio length
     short_text = text[:120]
-
     asyncio.run(tts_async(short_text, path))
     return path
 
@@ -110,7 +111,7 @@ def create_clip(img_path, audio_path):
     return clip
 
 # ---------------------------
-# 🎥 FAST VIDEO GENERATION
+# 🎥 VIDEO GENERATION
 # ---------------------------
 def generate_video(slides):
     clips = []
@@ -126,7 +127,6 @@ def generate_video(slides):
 
     output = "final_video.mp4"
 
-    # ⚡ ULTRA FAST render
     final.write_videofile(
         output,
         fps=12,
@@ -166,6 +166,5 @@ if st.button("Generate Video"):
 
         video = generate_video(slides)
 
-        st.success("✅ Video Ready (Fast Mode)!")
+        st.success("✅ Video Ready!")
         st.video(video)
-
