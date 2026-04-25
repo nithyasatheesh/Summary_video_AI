@@ -36,7 +36,7 @@ def clean_json(text):
     return text[start:end]
 
 # ---------------------------
-# 🧠 GENERATE CONTENT (GOOD SLIDES)
+# 🧠 GENERATE CONTENT
 # ---------------------------
 def generate_all(text):
     raw = call_openai(f"""
@@ -46,7 +46,7 @@ RULES:
 - 5 slides only
 - Max 3 bullet points
 - Each bullet under 5 words
-- Titles: 2–3 words
+- Titles: 2–3 words only
 - Explanation short (max 20 words)
 
 Return JSON:
@@ -64,38 +64,41 @@ Return JSON:
 TEXT:
 {text}
 """)
-
     raw = clean_json(raw)
     return json.loads(raw)
 
 # ---------------------------
-# 🎨 CREATE SLIDE (PRO DESIGN)
+# 🔤 LOAD FONTS (FIXED)
 # ---------------------------
-def create_slide(title, points):
-    img = Image.new("RGB", (1280, 720), "#fdfdfd")
-    draw = ImageDraw.Draw(img)
-
+def load_fonts():
     try:
-        title_font = ImageFont.truetype("arial.ttf", 95)
-        point_font = ImageFont.truetype("arial.ttf", 58)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 120)
+        point_font = ImageFont.truetype("DejaVuSans.ttf", 70)
     except:
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
+    return title_font, point_font
 
-    # TITLE (LEFT TOP)
+# ---------------------------
+# 🎨 CREATE SLIDE
+# ---------------------------
+def create_slide(title, points):
+    img = Image.new("RGB", (1280, 720), "#ffffff")
+    draw = ImageDraw.Draw(img)
+
+    title_font, point_font = load_fonts()
+
+    # Title (left aligned)
     draw.text((80, 80), title, fill="black", font=title_font)
 
     # underline
-    draw.line((80, 200, 1200, 200), fill="black", width=3)
+    draw.line((80, 220, 1200, 220), fill="black", width=4)
 
-    # BULLETS
-    y = 260
+    # bullets
+    y = 300
     for p in points[:3]:
-        if len(p) > 35:
-            p = p[:35] + "..."
-
         draw.text((120, y), f"• {p}", fill="black", font=point_font)
-        y += 110
+        y += 140
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
@@ -113,10 +116,8 @@ async def tts_async(text, path):
 
 def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-
-    short_text = text[:120]
+    short_text = text[:120]  # keep fast
     asyncio.run(tts_async(short_text, path))
-
     return path
 
 # ---------------------------
@@ -129,7 +130,7 @@ def create_clip(img_path, audio_path):
     return clip
 
 # ---------------------------
-# 🎥 VIDEO
+# 🎥 GENERATE VIDEO
 # ---------------------------
 def generate_video(slides):
     clips = []
