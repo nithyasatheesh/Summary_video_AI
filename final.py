@@ -3,6 +3,8 @@ from openai import OpenAI
 import tempfile
 import json
 import asyncio
+import os
+import requests
 
 import edge_tts
 from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
@@ -15,6 +17,27 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
 st.title("🎬 AI Transcript → Clean Video")
+
+FONT_PATH = "font.ttf"
+
+# ---------------------------
+# 📥 DOWNLOAD FONT (FIX)
+# ---------------------------
+def download_font():
+    if not os.path.exists(FONT_PATH):
+        url = "https://github.com/google/fonts/raw/main/apache/roboto/Roboto-Bold.ttf"
+        r = requests.get(url)
+        with open(FONT_PATH, "wb") as f:
+            f.write(r.content)
+
+# ---------------------------
+# 🔤 LOAD FONTS (REAL BIG)
+# ---------------------------
+def load_fonts():
+    download_font()
+    title_font = ImageFont.truetype(FONT_PATH, 140)  # 🔥 BIG
+    point_font = ImageFont.truetype(FONT_PATH, 80)   # 🔥 BIG
+    return title_font, point_font
 
 # ---------------------------
 # 🧠 OPENAI CALL
@@ -44,10 +67,10 @@ Create presentation slides.
 
 RULES:
 - 5 slides only
-- Max 3 bullet points
-- Each bullet under 5 words
+- Max 2 bullet points
+- Each bullet under 4 words
 - Titles: 2–3 words only
-- Explanation short (max 20 words)
+- Explanation short (max 15 words)
 
 Return JSON:
 {{
@@ -68,18 +91,6 @@ TEXT:
     return json.loads(raw)
 
 # ---------------------------
-# 🔤 LOAD FONTS (FIXED)
-# ---------------------------
-def load_fonts():
-    try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 120)
-        point_font = ImageFont.truetype("DejaVuSans.ttf", 70)
-    except:
-        title_font = ImageFont.load_default()
-        point_font = ImageFont.load_default()
-    return title_font, point_font
-
-# ---------------------------
 # 🎨 CREATE SLIDE
 # ---------------------------
 def create_slide(title, points):
@@ -88,17 +99,17 @@ def create_slide(title, points):
 
     title_font, point_font = load_fonts()
 
-    # Title (left aligned)
+    # TITLE
     draw.text((80, 80), title, fill="black", font=title_font)
 
     # underline
-    draw.line((80, 220, 1200, 220), fill="black", width=4)
+    draw.line((80, 240, 1200, 240), fill="black", width=5)
 
-    # bullets
-    y = 300
-    for p in points[:3]:
+    # BULLETS
+    y = 320
+    for p in points[:2]:
         draw.text((120, y), f"• {p}", fill="black", font=point_font)
-        y += 140
+        y += 150
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
@@ -116,7 +127,7 @@ async def tts_async(text, path):
 
 def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-    short_text = text[:120]  # keep fast
+    short_text = text[:100]  # keep fast
     asyncio.run(tts_async(short_text, path))
     return path
 
@@ -130,7 +141,7 @@ def create_clip(img_path, audio_path):
     return clip
 
 # ---------------------------
-# 🎥 GENERATE VIDEO
+# 🎥 VIDEO
 # ---------------------------
 def generate_video(slides):
     clips = []
