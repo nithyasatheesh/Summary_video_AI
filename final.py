@@ -1,8 +1,8 @@
+```python
 import streamlit as st
 import tempfile
 import json
 import asyncio
-import os
 
 import edge_tts
 from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
 
 # ---------------------------
-# 🔑 API KEY (set in Streamlit secrets)
+# 🔑 API KEY
 # ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -18,7 +18,7 @@ st.set_page_config(page_title="Fast AI Video Generator", layout="centered")
 st.title("⚡ AI Transcript → Video Generator")
 
 # ---------------------------
-# 🧠 AI CALL (DEPLOYABLE)
+# 🧠 AI CALL
 # ---------------------------
 def call_ai(prompt):
     response = client.chat.completions.create(
@@ -61,32 +61,67 @@ TEXT:
     return json.loads(raw)
 
 # ---------------------------
-# 🎨 CREATE SLIDE
+# 🧾 TEXT WRAP
+# ---------------------------
+def wrap_text(text, font, max_width):
+    words = text.split()
+    lines = []
+
+    while words:
+        line = ""
+        while words:
+            test = line + words[0] + " "
+            w = font.getbbox(test)[2]
+            if w <= max_width:
+                line = test
+                words.pop(0)
+            else:
+                break
+        lines.append(line.strip())
+    return lines
+
+# ---------------------------
+# 🎨 CREATE SLIDE (UPGRADED)
 # ---------------------------
 def create_slide(title, points):
     img = Image.new("RGB", (854, 480), "white")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("arial.ttf", 40)
-        point_font = ImageFont.truetype("arial.ttf", 25)
+        title_font = ImageFont.truetype("arial.ttf", 55)
+        point_font = ImageFont.truetype("arial.ttf", 34)
     except:
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    draw.text((40, 20), title, fill="black", font=title_font)
+    # Center title
+    bbox = draw.textbbox((0, 0), title, font=title_font)
+    title_w = bbox[2] - bbox[0]
+    draw.text(((854 - title_w) / 2, 30), title, fill="black", font=title_font)
 
-    y = 100
+    # Divider line
+    draw.line((100, 110, 754, 110), fill="black", width=2)
+
+    y = 150
+
     for p in points:
-        draw.text((60, y), f"• {p}", fill="black", font=point_font)
-        y += 40
+        # circular bullet
+        draw.ellipse((100, y + 12, 115, y + 27), fill="black")
+
+        lines = wrap_text(p, point_font, 600)
+
+        for line in lines:
+            draw.text((130, y), line, fill="black", font=point_font)
+            y += 42
+
+        y += 10
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# 🔊 TTS
+# 🔊 TTS (UNCHANGED VOICE)
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
@@ -161,6 +196,6 @@ if st.button("Generate Video"):
 
         video = generate_video(data["slides"])
 
-        st.success("✅ Done!")
+        st.success("✅ Video Ready!")
         st.video(video)
-
+```
