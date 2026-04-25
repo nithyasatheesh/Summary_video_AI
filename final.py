@@ -175,7 +175,6 @@ if st.button("Generate Video"):
 
         st.subheader("📄 Summary")
         st.write(data["summary"])
-
         video = generate_video(data["slides"])
 
         st.success("✅ Video Ready!")
