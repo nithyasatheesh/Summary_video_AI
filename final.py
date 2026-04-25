@@ -32,9 +32,12 @@ def call_openai(prompt):
 # 🧹 CLEAN JSON
 # ---------------------------
 def clean_json(text):
-    start = text.find("{")
-    end = text.rfind("}") + 1
-    return text[start:end]
+    try:
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        return text[start:end]
+    except:
+        return "{}"
 
 # ---------------------------
 # 🧠 GENERATE CONTENT
@@ -44,10 +47,11 @@ def generate_all(text):
 Create a detailed educational video script.
 
 STRICT RULES:
-- Total video duration: 3 to 5 minutes
-- Create 8 to 12 slides
+- Duration: 3 to 5 minutes
+- 8 to 12 slides
 - Each explanation: 40–80 words
-- Keep bullet points short (max 4 per slide)
+- Max 4 bullet points
+- image_prompt MUST be descriptive and safe
 
 Return JSON only:
 {{
@@ -57,7 +61,7 @@ Return JSON only:
       "title": "...",
       "points": ["...", "..."],
       "explanation": "...",
-      "image_prompt": "describe an image"
+      "image_prompt": "clear educational illustration"
     }}
   ]
 }}
@@ -65,27 +69,50 @@ Return JSON only:
 TEXT:
 {text}
 """)
+
     raw = clean_json(raw)
-    return json.loads(raw)
+
+    try:
+        return json.loads(raw)
+    except:
+        st.error("⚠️ Failed to parse AI response")
+        return {"summary": "", "slides": []}
 
 # ---------------------------
-# 🖼️ GENERATE IMAGE
+# 🖼️ SAFE IMAGE GENERATION
 # ---------------------------
 def generate_image(prompt):
-    response = client.images.generate(
-        model="gpt-image-1",
-        prompt=prompt,
-        size="512x512"
-    )
+    try:
+        if not prompt or len(prompt.strip()) < 5:
+            prompt = "minimal educational illustration, white background"
 
-    image_base64 = response.data[0].b64_json
-    image_bytes = base64.b64decode(image_base64)
+        # Optional debug
+        # st.write("🖼️ Prompt:", prompt)
 
-    path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-    with open(path, "wb") as f:
-        f.write(image_bytes)
+        response = client.images.generate(
+            model="gpt-image-1",
+            prompt=prompt,
+            size="512x512"
+        )
 
-    return path
+        image_base64 = response.data[0].b64_json
+        image_bytes = base64.b64decode(image_base64)
+
+        path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
+        with open(path, "wb") as f:
+            f.write(image_bytes)
+
+        return path
+
+    except Exception as e:
+        print("Image error:", e)
+
+        # fallback image
+        img = Image.new("RGB", (512, 512), "white")
+        path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
+        img.save(path)
+
+        return path
 
 # ---------------------------
 # 🎨 CREATE SLIDE
@@ -101,7 +128,6 @@ def create_slide(title, points, image_path=None):
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    # Title
     draw.text((60, 40), title, fill="black", font=title_font)
 
     y = 180
@@ -109,7 +135,6 @@ def create_slide(title, points, image_path=None):
         draw.text((80, y), f"• {p}", fill="black", font=point_font)
         y += 80
 
-    # Add image
     if image_path:
         try:
             slide_img = Image.open(image_path).resize((400, 300))
@@ -122,7 +147,7 @@ def create_slide(title, points, image_path=None):
     return path
 
 # ---------------------------
-# 🔊 TEXT TO SPEECH
+# 🔊 TTS
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
@@ -151,19 +176,24 @@ def create_clip(img_path, audio_path):
 def generate_video(slides):
     clips = []
 
-    for slide in slides:
-        img_ai = generate_image(slide["image_prompt"])
+    for i, slide in enumerate(slides):
+        st.write(f"⏳ Processing slide {i+1}/{len(slides)}")
+
+        img_ai = generate_image(slide.get("image_prompt", ""))
 
         img = create_slide(
-            slide["title"],
-            slide["points"],
+            slide.get("title", "Slide"),
+            slide.get("points", []),
             img_ai
         )
 
-        audio = generate_audio(slide["explanation"])
+        audio = generate_audio(slide.get("explanation", ""))
         clip = create_clip(img, audio)
 
         clips.append(clip)
+
+    if not clips:
+        return None
 
     final = concatenate_videoclips(clips, method="compose")
 
@@ -192,7 +222,7 @@ if st.button("Generate Video"):
         st.warning("Upload files first")
         st.stop()
 
-    with st.spinner("⏳ Generating 3–5 min video..."):
+    with st.spinner("⏳ Generating video..."):
 
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
@@ -200,9 +230,12 @@ if st.button("Generate Video"):
         data = generate_all(merged)
 
         st.subheader("📄 Summary")
-        st.write(data["summary"])
+        st.write(data.get("summary", ""))
 
-        video = generate_video(data["slides"])
+        video = generate_video(data.get("slides", []))
 
-        st.success("✅ Video Ready!")
-        st.video(video)
+        if video:
+            st.success("✅ Video Ready!")
+            st.video(video)
+        else:
+            st.error("❌ Video generation failed")
