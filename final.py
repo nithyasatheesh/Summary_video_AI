@@ -13,19 +13,19 @@ from PIL import Image, ImageDraw, ImageFont
 # ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.set_page_config(page_title="Clean AI Video Generator", layout="centered")
-st.title("🎬 Clean AI Transcript → Video")
+st.set_page_config(page_title="Fast AI Video Generator", layout="centered")
+st.title("⚡ Fast AI Transcript → Video Generator")
 
 # ---------------------------
 # 🧠 OPENAI CALL
 # ---------------------------
 def call_openai(prompt):
-    response = client.chat.completions.create(
+    res = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.6
     )
-    return response.choices[0].message.content
+    return res.choices[0].message.content
 
 # ---------------------------
 # 🧹 CLEAN JSON
@@ -36,20 +36,20 @@ def clean_json(text):
     return text[start:end]
 
 # ---------------------------
-# 🧠 GENERATE CONTENT
+# 🧠 AI GENERATION (BETTER SLIDES)
 # ---------------------------
 def generate_all(text):
     raw = call_openai(f"""
 Create clean presentation slides.
 
 RULES:
-- 6 to 7 slides
-- Each slide: max 3 bullet points
-- Each bullet: short and clear
-- Explanation: 20–40 words (natural speech)
-- Titles must be short and strong
+- 5 to 6 slides only
+- Max 2 bullet points per slide
+- Each bullet under 6 words
+- Titles short (2–4 words)
+- Explanation short (max 25 words)
 
-Return JSON:
+Return JSON only:
 {{
   "summary": "...",
   "slides": [
@@ -64,42 +64,41 @@ Return JSON:
 TEXT:
 {text}
 """)
-
     raw = clean_json(raw)
-
-    try:
-        return json.loads(raw)
-    except:
-        return {"summary": "", "slides": []}
+    return json.loads(raw)
 
 # ---------------------------
-# 🎨 CREATE SLIDE (BIG TEXT)
+# 🎨 CREATE SLIDE (BIG FONT)
 # ---------------------------
 def create_slide(title, points):
     img = Image.new("RGB", (1280, 720), "white")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("arial.ttf", 95)
-        point_font = ImageFont.truetype("arial.ttf", 60)
+        title_font = ImageFont.truetype("arial.ttf", 110)
+        point_font = ImageFont.truetype("arial.ttf", 70)
     except:
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    # Title centered
-    draw.text((60, 60), title, fill="black", font=title_font)
+    # Center title
+    w, h = draw.textbbox((0, 0), title, font=title_font)[2:]
+    draw.text(((1280 - w) // 2, 120), title, fill="black", font=title_font)
 
-    y = 260
-    for p in points[:3]:
-        draw.text((100, y), f"• {p}", fill="black", font=point_font)
-        y += 120
+    # Bullets
+    y = 380
+    for p in points[:2]:
+        text = f"• {p}"
+        w, h = draw.textbbox((0, 0), text, font=point_font)[2:]
+        draw.text(((1280 - w) // 2, y), text, fill="black", font=point_font)
+        y += 140
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# 🔊 TTS
+# 🔊 FAST TTS
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
@@ -111,8 +110,8 @@ async def tts_async(text, path):
 def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
 
-    # keep narration short but natural
-    short_text = text[:180]
+    # shorter audio for speed
+    short_text = text[:120]
 
     asyncio.run(tts_async(short_text, path))
     return path
@@ -127,24 +126,17 @@ def create_clip(img_path, audio_path):
     return clip
 
 # ---------------------------
-# 🎥 GENERATE VIDEO
+# 🎥 FAST VIDEO
 # ---------------------------
 def generate_video(slides):
     clips = []
 
-    for slide in slides[:7]:
-        img = create_slide(
-            slide.get("title", "Slide"),
-            slide.get("points", [])
-        )
+    for slide in slides[:6]:
+        img = create_slide(slide["title"], slide["points"])
+        audio = generate_audio(slide["explanation"])
 
-        audio = generate_audio(slide.get("explanation", ""))
         clip = create_clip(img, audio)
-
         clips.append(clip)
-
-    if not clips:
-        return None
 
     final = concatenate_videoclips(clips, method="compose")
 
@@ -163,7 +155,7 @@ def generate_video(slides):
 # 📥 UI
 # ---------------------------
 files = st.file_uploader(
-    "Upload transcript (.txt)",
+    "Upload transcript files",
     type=["txt"],
     accept_multiple_files=True
 )
@@ -174,7 +166,7 @@ if st.button("Generate Video"):
         st.warning("Upload files first")
         st.stop()
 
-    with st.spinner("⚡ Generating clean video..."):
+    with st.spinner("⚡ Processing fast..."):
 
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
@@ -182,12 +174,9 @@ if st.button("Generate Video"):
         data = generate_all(merged)
 
         st.subheader("📄 Summary")
-        st.write(data.get("summary", ""))
+        st.write(data["summary"])
 
-        video = generate_video(data.get("slides", []))
+        video = generate_video(data["slides"])
 
-        if video:
-            st.success("✅ Video Ready!")
-            st.video(video)
-        else:
-            st.error("❌ Failed to generate video")
+        st.success("✅ Video Ready!")
+        st.video(video)
