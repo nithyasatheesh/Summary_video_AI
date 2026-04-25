@@ -3,7 +3,6 @@ from openai import OpenAI
 import tempfile
 import json
 import asyncio
-import base64
 
 import edge_tts
 from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
@@ -14,8 +13,8 @@ from PIL import Image, ImageDraw, ImageFont
 # ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.set_page_config(page_title="AI Video Generator", layout="centered")
-st.title("🎬 AI Transcript → Video Generator (3–5 min)")
+st.set_page_config(page_title="Clean AI Video Generator", layout="centered")
+st.title("🎬 Clean AI Transcript → Video")
 
 # ---------------------------
 # 🧠 OPENAI CALL
@@ -24,7 +23,7 @@ def call_openai(prompt):
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.7
+        temperature=0.6
     )
     return response.choices[0].message.content
 
@@ -32,36 +31,32 @@ def call_openai(prompt):
 # 🧹 CLEAN JSON
 # ---------------------------
 def clean_json(text):
-    try:
-        start = text.find("{")
-        end = text.rfind("}") + 1
-        return text[start:end]
-    except:
-        return "{}"
+    start = text.find("{")
+    end = text.rfind("}") + 1
+    return text[start:end]
 
 # ---------------------------
 # 🧠 GENERATE CONTENT
 # ---------------------------
 def generate_all(text):
     raw = call_openai(f"""
-Create a detailed educational video script.
+Create clean presentation slides.
 
-STRICT RULES:
-- Duration: 3 to 5 minutes
-- 8 to 12 slides
-- Each explanation: 40–80 words
-- Max 4 bullet points
-- image_prompt MUST be descriptive and safe
+RULES:
+- 6 to 7 slides
+- Each slide: max 3 bullet points
+- Each bullet: short and clear
+- Explanation: 20–40 words (natural speech)
+- Titles must be short and strong
 
-Return JSON only:
+Return JSON:
 {{
   "summary": "...",
   "slides": [
     {{
       "title": "...",
       "points": ["...", "..."],
-      "explanation": "...",
-      "image_prompt": "clear educational illustration"
+      "explanation": "..."
     }}
   ]
 }}
@@ -75,72 +70,29 @@ TEXT:
     try:
         return json.loads(raw)
     except:
-        st.error("⚠️ Failed to parse AI response")
         return {"summary": "", "slides": []}
 
 # ---------------------------
-# 🖼️ SAFE IMAGE GENERATION
+# 🎨 CREATE SLIDE (BIG TEXT)
 # ---------------------------
-def generate_image(prompt):
-    try:
-        if not prompt or len(prompt.strip()) < 5:
-            prompt = "minimal educational illustration, white background"
-
-        # Optional debug
-        # st.write("🖼️ Prompt:", prompt)
-
-        response = client.images.generate(
-            model="gpt-image-1",
-            prompt=prompt,
-            size="512x512"
-        )
-
-        image_base64 = response.data[0].b64_json
-        image_bytes = base64.b64decode(image_base64)
-
-        path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-        with open(path, "wb") as f:
-            f.write(image_bytes)
-
-        return path
-
-    except Exception as e:
-        print("Image error:", e)
-
-        # fallback image
-        img = Image.new("RGB", (512, 512), "white")
-        path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-        img.save(path)
-
-        return path
-
-# ---------------------------
-# 🎨 CREATE SLIDE
-# ---------------------------
-def create_slide(title, points, image_path=None):
+def create_slide(title, points):
     img = Image.new("RGB", (1280, 720), "white")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("arial.ttf", 70)
-        point_font = ImageFont.truetype("arial.ttf", 45)
+        title_font = ImageFont.truetype("arial.ttf", 95)
+        point_font = ImageFont.truetype("arial.ttf", 60)
     except:
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    draw.text((60, 40), title, fill="black", font=title_font)
+    # Title centered
+    draw.text((60, 60), title, fill="black", font=title_font)
 
-    y = 180
-    for p in points[:4]:
-        draw.text((80, y), f"• {p}", fill="black", font=point_font)
-        y += 80
-
-    if image_path:
-        try:
-            slide_img = Image.open(image_path).resize((400, 300))
-            img.paste(slide_img, (820, 200))
-        except:
-            pass
+    y = 260
+    for p in points[:3]:
+        draw.text((100, y), f"• {p}", fill="black", font=point_font)
+        y += 120
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
@@ -158,7 +110,11 @@ async def tts_async(text, path):
 
 def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-    asyncio.run(tts_async(text, path))
+
+    # keep narration short but natural
+    short_text = text[:180]
+
+    asyncio.run(tts_async(short_text, path))
     return path
 
 # ---------------------------
@@ -176,15 +132,10 @@ def create_clip(img_path, audio_path):
 def generate_video(slides):
     clips = []
 
-    for i, slide in enumerate(slides):
-        st.write(f"⏳ Processing slide {i+1}/{len(slides)}")
-
-        img_ai = generate_image(slide.get("image_prompt", ""))
-
+    for slide in slides[:7]:
         img = create_slide(
             slide.get("title", "Slide"),
-            slide.get("points", []),
-            img_ai
+            slide.get("points", [])
         )
 
         audio = generate_audio(slide.get("explanation", ""))
@@ -201,8 +152,9 @@ def generate_video(slides):
 
     final.write_videofile(
         output,
-        fps=24,
-        preset="medium"
+        fps=12,
+        preset="ultrafast",
+        threads=4
     )
 
     return output
@@ -222,7 +174,7 @@ if st.button("Generate Video"):
         st.warning("Upload files first")
         st.stop()
 
-    with st.spinner("⏳ Generating video..."):
+    with st.spinner("⚡ Generating clean video..."):
 
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
@@ -238,4 +190,4 @@ if st.button("Generate Video"):
             st.success("✅ Video Ready!")
             st.video(video)
         else:
-            st.error("❌ Video generation failed")
+            st.error("❌ Failed to generate video")
