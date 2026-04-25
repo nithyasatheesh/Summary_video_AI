@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import tempfile
 import json
@@ -164,4 +163,4 @@ if st.button("Generate Video"):
 
         st.success("✅ Done!")
         st.video(video)
-```
+
