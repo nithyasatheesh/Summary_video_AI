@@ -8,16 +8,13 @@ from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
 
-# ---------------------------
-# 🔑 API KEY
-# ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.set_page_config(page_title="Fast AI Video Generator", layout="centered")
-st.title("⚡ AI Transcript → Video Generator")
+st.set_page_config(page_title="AI Video Generator", layout="centered")
+st.title("🎬 AI Transcript → 3-5 Min Video Generator")
 
 # ---------------------------
-# 🧠 AI CALL
+# AI
 # ---------------------------
 def call_ai(prompt):
     response = client.chat.completions.create(
@@ -26,106 +23,94 @@ def call_ai(prompt):
     )
     return response.choices[0].message.content
 
-# ---------------------------
-# 🧹 CLEAN JSON
-# ---------------------------
 def clean_json(text):
-    start = text.find("{")
-    end = text.rfind("}") + 1
-    return text[start:end]
+    return text[text.find("{"):text.rfind("}")+1]
 
-# ---------------------------
-# 🧠 AI GENERATION
-# ---------------------------
 def generate_all(text):
     raw = call_ai(f"""
-Create summary + slides.
+Create a COMPLETE explanation.
 
-Return JSON only:
-{{
-  "summary": "...",
-  "slides": [
-    {{
-      "title": "...",
-      "points": ["...", "..."],
-      "explanation": "..."
-    }}
-  ]
-}}
+STRICT:
+- 12 to 18 slides
+- Max 4 bullet points per slide
+- Explanation: 2–3 sentences
+
+Return JSON only.
 
 TEXT:
 {text}
 """)
-    raw = clean_json(raw)
-    return json.loads(raw)
+    return json.loads(clean_json(raw))
 
 # ---------------------------
-# 🧾 TEXT WRAP
+# TEXT WRAP (BETTER)
 # ---------------------------
 def wrap_text(text, font, max_width):
     words = text.split()
     lines = []
+    line = ""
 
-    while words:
-        line = ""
-        while words:
-            test = line + words[0] + " "
-            w = font.getbbox(test)[2]
-            if w <= max_width:
-                line = test
-                words.pop(0)
-            else:
-                break
-        lines.append(line.strip())
+    for word in words:
+        test = line + word + " "
+        if font.getbbox(test)[2] <= max_width:
+            line = test
+        else:
+            lines.append(line.strip())
+            line = word + " "
+
+    lines.append(line.strip())
     return lines
 
 # ---------------------------
-# 🎨 CREATE SLIDE (UPGRADED)
+# SLIDE DESIGN (UPGRADED)
 # ---------------------------
 def create_slide(title, points):
     img = Image.new("RGB", (854, 480), "white")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("arial.ttf", 55)
-        point_font = ImageFont.truetype("arial.ttf", 34)
+        title_font = ImageFont.truetype("arial.ttf", 65)   # 🔥 bigger
+        point_font = ImageFont.truetype("arial.ttf", 40)   # 🔥 bigger
     except:
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    # Center title
+    # Center Title
     bbox = draw.textbbox((0, 0), title, font=title_font)
-    title_w = bbox[2] - bbox[0]
+    title_w = bbox[2]
     draw.text(((854 - title_w) / 2, 30), title, fill="black", font=title_font)
 
-    # Divider line
-    draw.line((100, 110, 754, 110), fill="black", width=2)
+    # Divider
+    draw.line((80, 120, 770, 120), fill="#444", width=3)
 
-    y = 150
+    y = 160
 
     for p in points:
-        # circular bullet
-        draw.ellipse((100, y + 12, 115, y + 27), fill="black")
+        # Bullet circle
+        bullet_x = 90
+        draw.ellipse((bullet_x, y+12, bullet_x+14, y+26), fill="#222")
 
+        # Wrapped text
         lines = wrap_text(p, point_font, 600)
 
         for line in lines:
-            draw.text((130, y), line, fill="black", font=point_font)
-            y += 42
+            draw.text((120, y), line, fill="#111", font=point_font)
+            y += 48  # 🔥 better spacing
 
-        y += 10
+        y += 15  # space between bullets
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# 🔊 TTS (UNCHANGED VOICE)
+# TTS (UNCHANGED VOICE)
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
-        text=text[:120],
-        voice="en-US-AriaNeural"
+        text=text[:400],
+        voice="en-US-AriaNeural",
+        rate="-10%"
     )
     await communicate.save(path)
 
@@ -135,17 +120,16 @@ def generate_audio(text):
     return path
 
 # ---------------------------
-# 🎬 CREATE CLIP
+# VIDEO
 # ---------------------------
 def create_clip(img_path, audio_path):
     audio = AudioFileClip(audio_path)
-    clip = ImageClip(img_path).with_duration(audio.duration)
+    duration = max(audio.duration, 10)
+
+    clip = ImageClip(img_path).with_duration(duration)
     clip = clip.with_audio(audio)
     return clip
 
-# ---------------------------
-# 🎥 VIDEO
-# ---------------------------
 def generate_video(slides):
     clips = []
 
@@ -153,8 +137,7 @@ def generate_video(slides):
         img = create_slide(slide["title"], slide["points"])
         audio = generate_audio(slide["explanation"])
 
-        clip = create_clip(img, audio)
-        clips.append(clip)
+        clips.append(create_clip(img, audio))
 
     final = concatenate_videoclips(clips, method="compose")
 
@@ -169,7 +152,7 @@ def generate_video(slides):
     return output
 
 # ---------------------------
-# 📥 UI
+# UI
 # ---------------------------
 files = st.file_uploader(
     "Upload transcript files",
@@ -183,7 +166,7 @@ if st.button("Generate Video"):
         st.warning("Upload files first")
         st.stop()
 
-    with st.spinner("⚡ Processing..."):
+    with st.spinner("🎬 Generating video..."):
 
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
