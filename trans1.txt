@@ -1,0 +1,620 @@
+Yes, good evening, everyone.
+Yes.
+Let me share my screen.
+Okay, so today's topic is, that is, we are going to look at about generative A, okay, introduction to Gen A, especially that is LLM, and also adding to that prompt engineering hands-on. Then in particularly, we will look at about transformers, that is LLM architecture.
+Okay, so in the self-raised video, you have seen already that introduction has been given about the generative way that is LLM models and also that prompt engineering concepts. So we are going to look at about that in detail and also we'll do the hands-on part of it. Okay, and tomorrow we'll do that RAG concepts that is RAG.
+techniques on LLL.
+Just.
+Yeah, so these are all things we are going to discuss about that what is Gen AI and we are going to compare with the traditional AI and Gen AI. Then on use cases, generative use cases and we will know then we will go with overview of generative AI platforms, different kind of.
+tools, 8 tools. So already we are working on that. I will give just introduction about that. Then we will move on to transformers. That is that LLM architecture, how that LLM models know, generate the outputs, okay, how the generative AI works in the back end. Those things we will look at about, then we will do hands-on. After that, we will look at about prompt engineering and hands-on part on that.
+Okay.
+Okay, so what is generative AI? Generative AI is a type of AI, we know that. So that can generate or create new content or new things. So if you give it instructions, it can write a story, draw an image, or even it.
+compose music or generate a code to everyone we are using that day. No, so it's like having a friend who never gets tired of brainstorming ideas with you nowadays. No, any things if you want to clarify or if you want to know about that, we are going with a day tools like ChatGPT or Gemini or Proxity like that.
+So we can call it as a friend and also we can say that who never gets not tired.
+Yeah, example, we can say that now, suppose if you want to get some information, otherwise using ChatGPT or any kind of AA tools, if I'm giving a prompt like, write me a birthday poem for my best friend, okay? And particularly I mentioned that who loves cricket.
+And within a second, you know, that AI tool generate that content and that poem, and now we can see that customized poem. If that is the very best example for that generative AI, that is AI tools. So now let's see that use cases. So in this slide note, I have added like that to think of generative AI as a chef in a kitchen.
+Okay, so let's understand with a simple analogy. So just you think of generative AI as a chef in a kitchen. Okay.
+Now, the chef has access to a set of ingredients. OK, that's like the data available to AA. OK, so the chef also has recipes that's similar to the algorithms the AA uses. OK, but here is the interesting.
+part, instead of always following a fixed recipe, this chef can experiment. Okay, they can mix ingredients in new ways. So they try out fresh ideas and surprise the people with the dishes. No, we have never seen or tasted before.
+Similarly, GenerativeA uses data and algorithms as its base ingredients, but instead of just repeating existing recipes, it creates new content.
+Okay, whether it may be a text, images, audio, or even the code, okay, the software codes. So by adding its own creative touch. So just like a chef innovates in the kitchen, generative AI innovates with information and produces something.
+Original.
+Okay.
+Now, let's see the comparison of traditional AI and the generative AI. We know that traditional AI is a rule-based of thing, no? That is, I'm just...
+Traditionally, AI is a rule-based one.
+It follows that instruction set of instructions it should follow there. And we can analyze. That means that traditionally it can analyze data, classify things, make predictions. For example, we can say that a bank's fraud detection. OK, fraud detection system. It looks for unusual activity based on the fixed rules.
+And another example, we can say recommendation engines. Okay, Netflix or Amazon. So there it looks at you were past choices and suggest the similar ones. So traditionally, AI is great at recognized patterns and making decisions, but it doesn't create anything new. Okay.
+It doesn't create.
+anything new that is traditionally. On the other hand, the generative AI.
+This generative AI, I think, here only now, sorry, like that.
+Okay, so generative AI, it doesn't just analyze. Okay, so generative AI here itself, I will do that, no issues. So it creates, it generates a new content, not only just analyzing the data. It learns from huge amounts of data and then generates a new text, new images, or new code.
+Okay, so example already I mentioned no if I want appointments if I ask that then it creates 1 instantly.
+Or otherwise I want to design A logo. So if I'm asking that if I'm getting proper prompt, then it generates new designs. So it's like the difference between someone who can recognize music versus someone who can compose a brand new song.
+Okay, that is generate.
+So unlike traditional age, generative way learns patterns and can produce new data or new content. This makes it powerful for creativity, innovation and personalization.
+Okay, and another example also we can say that traditional AA we can say that is like
+GPS application app. So it shows you the fastest way to your destination.
+The same example like that, no, we can say this is like travel planner.
+So it creates a personalized travel itinerary with hotels, restaurants, and activities just for you. That is the main difference between generative and traditionally.
+OK, yeah, in this slide, it's the use cases also displayed.
+And in the generative AI, and traditionally already we know that in language translation, if you are considering that traditionally AI means we know that no already that traditional, yeah, statistical machine translation system, so it used fixed rules.
+So, translations often know sounded robotic and not natural.
+But in generative AI models, it uses advanced models like GPT nowadays is not three like that or for five, no, current two wasn't. So GPT models, it understands context trying to give translations that sound much more human-like.
+Okay, so instead of just a word for word translation, Jenny can translate an idiom in a way that makes sense in the target language.
+OK, and next thing is autumn design.
+So traditionally AI can know that is a designers had to manually use tools like Photoshop or Illustrator and so on. So AI only provided small support like filters. But in generative AI, the tools like DALL-E,
+Can generate an original painting, logo, or poster. OK, from just a text prompt. If I'm typing that, you know, a cat wearing sunglasses in cartoon style, then AA draws it for you, know instantly.
+and content generation. So here, the traditional AI, you know, it needed full human effort, writing blog posts, marketing material or reports, you know, creating some reports. It will take many hours, okay? But in generative AI,
+It writes draft, blogs, posts, social media posts, reports, and even stories. So it can speed up the process and then human policy output. Okay, final changes we have to make that. So example, if I'm asking that A tool to write a LinkedIn post about teamwork in sports.
+Then immediately it creates a full draft. Okay, within a second I can get that results.
+And if you look at in the healthcare use case or healthcare domain, so here the traditional AI, you know, so the doctors, yeah, so doctors relied on rule-based systems to analyze test results. So AI could only highlight the patterns, but in generative AI helps by summarizing.
+patient histories, generating reports, assisting in drug discovery, and also even though analyzing genetic data. Okay, instead of manually reading 100 patient records, GenetivA can give a one-page summary highlighting key risks within a second also. Okay, that is the main point.
+And in finance, so traditionally AI, there are also the strict rules will be followed, you know? If this, then that's some kind of things. Humans still had to do most of the work on that. But in the generative AI, that can analyze large amounts of financial data and it helps to detect the fraud faster and even generate automated financial reports.
+OK, and the example we can say that it can flag suspicious credit card activity instantly and also suggest a probable reason.
+So traditional A is like a helper following strict instructions. Okay, it is efficient but limited. But generative A is like a creative colleague, not only follows instruction, but also comes up with new ideas and outputs. Okay, that is a difference between.
+Generative A and traditional A in different domains. Okay. Okay, now can you answer this? What is the primary difference between Gen A and traditional A? Four options are given there. Please type your answers in the chat A, B, C, or D.
+AI's generative AI focuses on learning from data and generating new content, while traditionally AI relies on explicit programming and rule-based systems.
+The option traditionally in general terms used interchangeably.
+And it is only used for image recognition, while traditionally is used for natural language processing. Natural language processing, I hope you know that NLP, the text pre-processings, okay? The steps will be in all down there, even that machine learning or deep learning in that LLM models also, that is a required one. And traditionally is a new and experimental field, while generative is represented.
+The established traditional approach and artificially, which one is the right answer? So, everyone, please try to answer it.
+Yes, I got some responses that is A.A.K. everyone answered A.
+Okay, so here is the right answer.
+Generative AI focuses on learning from data and generating new content, and traditionally AI relies on explicit program and rule-based systems.
+OK, now let's see different types of models, OK, and also applications, OK, where the use cases like that, where we can use, you know, this kind of models, the GNA models.
+So here you can see autoencoders, variational models, transformers, RNN, GANs, that is generative adversarial networks.
+So you don't need to be a no scientist or a computer scientist to understand them. Just think of them as a different tools in a creative toolbox. Each tool has its own specialty. OK, so let's see about auto encoders.
+So, to encoders, it cleans, and...
+compresses data.
+Okay.
+Just, it's like a photo editor. OK, it's removing the noise or blur from a picture. Using autoencoders, we can perform these kind of operations. So this is mainly used for the unsupervised learning and also we should know to know that is parts.
+Okay, two parts of there, like encoders and decoders. I'm just creating this is encoder and.
+decoder. Okay.
+Encoder.
+Decoder and in between latent space will be there.
+It.
+Okay, latent space is nothing but circumference to one like that. So encoder that understands the context in this place.
+The model will understand the context that is known as encoder, OK?
+And decoder, it generates the output or a new kind.
+Okay, decoder generates the output and encoder understands the context. So first it understands the context, then it will go to the latent space, the compressing process will be happened, then finally it will give the, or generate the new content. Okay, anyway, I will explain this in detail in transformers.
+Okay, and also about auto encoders, if you are pausing the text means it will give that no input as a text, then output also will be a text. And if you are pausing over the image, then you will get that same kind of output. Okay, so I'm passing over an image that is 784 pixels, that image. It will pass over to the encoder.
+and then it will know compress will be happened. That means it will be reduced into the size that is 40 pixels. And when the decoder will be applied on that and finally it will return that 784 pixel of image. So if I'm passing over image, then autoencoders returns the image out.
+But if I'm passing the text, it means the data encoder, it gives the output as a text.
+Okay, so the use case is mainly it improves the medical scans in healthcare. Okay, making that x-rays, no images, that is a clearer one. And especially, no, it removing the background noise from the images or audio. So we can say this is a cleanup.
+Tool. OK, so it is used in image denoising and dimensionality reduction. OK, it is especially used in the dimensionality because I mentioned that no compressing that is a compress or reduce the dimensionality that operation also will be performed. I hope you heard about that PCA PCA technique principal component.
+Analysis. OK, so that means usually in that machine learning models, we are doing that when you have highest dimensionality. If you want to reduce the dimensionality, usually we are going with that PCA technique. It will create the components, OK, combining the multiple features to create a components.
+But we can't identify that. That is means unexplainable technique, this one, or a model we are saying that. Because using this, we can reduce the dimensionality, but we cannot find out which features helps or which features are gives the most important because the components will be
+the combination of some of the features, but it will not explain about that features. And also this is suitable for linear combination, the linear separator we have seen also for those kind of things we can use a PCA techniques to reduce the dimensionality. Otherwise we can go with.
+Yeah.
+Encoded, auto-encoded.
+Okay, so and also huge data comes means we can go with auto encoder technique to reduce the dimensionality. And also if it is a non-linear, no relationship is there a non-linear combination means we can go with auto encoder techniques to reduce the dimensionality. And anomaly detection in health.
+OK, so these are all the use cases.
+And now, second thing is variational models.
+So if you have any doubts, you can pause me at any time and clarify the doubts, okay? Yeah, variational models, we are calling that is variational autoencoder kind of things, VAE, okay, variational models. So it creates new variations of data.
+Create new variations of.
+Data. OK, like a chef that no chef experimenting with the same recipe to create different flavors. OK, so generate new images. If I'm no asking that to create images by using that variation models, then you generate new images that look realistic.
+And it is known as a probabilistic model.
+And also it applies the augmentation technique. Augmentation technique means if you read out that CNN models, that article, okay, that images, especially in the healthcare domain, for rare diseases, no, they don't have much more images. Okay, very few people are having the scanned images, we don't have the text images like that. So at that time, the research was
+created many more images by applying the augmentation technique. Augmentation means just we can change or change the, you know, angle, just rotating into the 45 degree, 90 degree, 180 degree kind of things with some kind of changes in that existing images will be happen. That is augmentation technique. Okay, like that here also that augmentation technique will be applied.
+And it will generate the new images, OK?
+So, operating image synthesis, data augmentation, and semi-supervised learning algorithm. OK, semi-supervised, you know that, no, half of the thing is supervised, another thing is no, half of the thing is unsupervised like that. OK, and next thing is transformer models.
+So, most of the large language models have transformer architecture. OK, they built on that, no transformer models, so transformers understands the context and...
+Generates languages, especially for the text to the languages, so it's like a super translator that can read, summarize, and talk back in no different styles or many styles. Our ChatGPT.
+OK, there in that, I know GPT model is GPT model is built to know, always that architecture that LLM know architecture is based on transformers.
+Okay, he translate the languages naturally. It summarize the long documents into short notes. So this is the conversation and language too.
+OK, so it is essential for machine translation, summarization, chat bots, text generation. OK, for related to that new text, we can use a transformer models. And next thing already you know that RNN model, if you have seen that document, then you can, you know about this very well.
+The current model, the neural network, core and net.
+That is not deep learning models. This is transformer also built on based on that neural network models only. And anyway, in detail, we will see about the transformers. So RNN, that is a short-term memory model. So this is known as.
+Since.
+Yes.
+Yes, so this is shorter.
+Memory model. OK. Short term memory model means if you have a lengthy of no paragraph kind of things, then the large documents means suppose very first step, if I'm using that name as Sundar and later I'm using the story kind of things. OK. If I'm using later, that is he or.
+OK, OK, that Sundramurthy represented as a he, but that our model will not understand that, who is that? No, the otherwise what he represents whom like that. OK, that is known as short term memory. OK, small paragraph or small sentences, no small data sets only we can apply to.
+RNN to do the prediction part.
+And also it process in that way of sequential way, that is a sequence to sequence model. This is known as sequence to sequence model. That means every time, no, that is not every time, at once, one word will be passed over there and another time, no, next time it will pass over another word and it will do the text processing and everything and based on that it will do the prediction.
+Okay, then it will take more time. Okay, if it is a huge data set.
+Otherwise, it is good for text generation or language translation. Okay, instead of transformers, if it is a small data set, you can go with RNN model to perform the same task. One more is that LSTM. LSTM is known as a long as well as short term memory. So long content also we can.
+Use, you know, suppose if you have a question why we have LSTM, we can apply that now we can use LSTM for large documents also to perform that language translation, all those things. Yes, you can do, but again, the problem is this is also known as sequence to sequence model, so every time you have to pass over that to only one burden.
+to do the processing, pre-processing, all those things. So it will take more time to execute that or do the prediction part, not to prediction, the generating the content part. But in the transformer, that is not a sequence to sequence, that is a parallel way of no processing will be happened. Not the same at a time, no, that entire sentence, entire.
+Content, OK, and the data will be passed over to there, and it will do the processing and it will generate the output very quickly. OK, that is the main difference between launch that is LSTM model and transformers. OK.
+Okay, and the final thing is again.
+Gans, we are saying otherwise, OK. Generative adversarial networks, so it creates high realistic images.
+That is the difference between VAE and this one.
+Big.
+Realistic images can be created or videos also.
+Okay, we can say like, no, two artists competing. One creates fake art, other tries to detect it. It's real. So what time the fakes, no, becomes so good, they look real. So in the same way, GANs will work. So image to image translation.
+Like, no turning a sketch into a realistic photo, or I hope you know deep fake videos. OK, so generating new designs or no new product prototypes for that, that if if that is your requirement, you can go with the GANS. OK, so we can call it as a realism.
+Two that make things look, uh, no, uh, real.
+Okay, it's tried to generate to fake but realistic data.
+Okay, it produces highly realistic images or videos. We are saying that odd generative tool like that. Okay, so based on the requirement, you need to select what kind of model is suitable for.
+Okay, and auto-encoders, I mentioned that is encoder, decoder separately. I have mentioned that no encoder helps to understand the context and the decoder helps to generate or reconstruct the no content like that, generate a new content, and we should know what kind of models that comes under encoder and decoder kind of thing, so...
+Very basic, otherwise all of you are using that tool, ChatGPT. Okay, so ChatGPT, can you answer this one? ChatGPT comes under encoder or decoder model. Just you answer that.
+Is it encoder or decoder? Encoder means understanding no the context and decoder means generate the new context. And so we have three types kind of things, encoder, model separately with the, decoder models will be there, encoder, decoder model that is auto encoders, okay.
+Uh, encode a decoder model, so be that.
+Encoder, encoder only model, decoder only model. So what about our chat GPT?
+Is it encoder model or decoder model or no, both encoder decoder model?
+If you heard about that, I mean, so you can answer that. I will just should guess an answer. Yeah, decoder, decoder, yes. OK, I got few responses, so that is correct only. ChatGPT, that not GPT. OK, not ChatGPT. We should say that the model GPT models are comes under.
+Decoder only models, not encoder. OK, so it understands the input based on the gives the output.
+And that is encoder, encoder model, only encoder.
+Sorry, not understand is 10 days.
+OK, I just write out that. OK, it generates the output.
+An encoder model is understands the input.
+And that example is, we can say, word model.
+OK, and encoder decoder model is T5 model. OK, the transform both will be there in that model, both structure will be there, T5 model.
+Okay, it combines both encoder and reticle. It's used for like no translation. So in the translation, we shouldn't require no machine language translation that input, that encoder is required, input understanding is required based on that it generates the output. Maybe I want to convert that English into French or English into German.
+So both architectures should be in there, then only it will give the generate the proper output. OK.
+So in the decoder model, it predicts the next word step by step. It uses only past content. Okay. Text generation task, we can perform it in the decoder models. Like chat bots, we can say that our code writing, everything comes under decoders. And encoder bot I mentioned, it is developed by Google.
+Okay, but I hope you know that about model developed by Google and it now understanding the text, understand the input. So take a sentence and encode it into a vectors or representations, no? Because normal way that no text will not be understand by the tool.
+So we should convert it into vector format, the numeric format. So the use cases we can say that sentiment analysis, question answering kind of things, or text classification. So those kind of things comes under the encoder model. OK? And decoder model means text generation and encoder, decoder, that translation. OK, those kind of things.
+process we can use it under. We have to use encoder, decoder models.
+You should know about these things, okay, the very basic concepts. Okay, now let's move on to, yes, please answer this. What type of Gen A model excels in image generation? That is realistic image.
+Everyone tried to answer that.
+I got only three responses. Option A, they have mentioned. What about others? Is there any other different answers?
+Okay, everyone answered A only. That is the right answer.
+GAN is the right answer. OK.
+Because auto encoders, we are saying that is a cleanup tool and variation models, that is a remix tool kind of things and transformers, conversation tool, and this GAN is the realism tool. OK, and one more RNN is there, no RNN is a memory tool. OK.
+So, together, these are the brains behind Jenny, each making it powerful in different ways. OK, based on the requirement, we have to choose that.
+Yeah, importance of Jenny.
+We know that Gen is a subset of AI that focuses on creating model capable of generating new content. No, I already explained that. So just know some of the importance I mentioned creativity and innovation and no creativity.
+Creativity means we can say that there is a no. Actually, generative is a crucial one because it helps us create, automate, personalize, and apply solutions on different domains. Okay, it's not about replacing the humans, it's about making humans more powerful and efficient.
+Okay, so if you talk about that creativity and innovation.
+So generative AI helps to know, it sparks the new ideas, okay, that humans may not think of right away, but it gives the new ideas, no? And also instantly it gives that. So creativity and innovation will be performed. That AI doesn't recycle old ideas, it can generate new content.
+Okay, in writing, otherwise not generating a music or generating an image or even that generate the codes. Okay.
+And how about automation? Yeah, each one has been explained separately.
+OK, so automation and efficiency. OK, in terms of automation and efficiency, we can say that generative AI improves productivity, no productivity by automating the task. OK, saving time, cutting cost, and helping people to focus on.
+smarter decision making instead of repetitive boy.
+OK, and the personalization, the problem solving, so...
+It doesn't just create content, it also personalize the personalize experiences for us and helps solve problems, especially the complex problems. OK, so you can adapt to based on what you like, but Netflix kind of things recommendations, so it shows that a match, you know, you got.
+Task, sorry, your previous, no past history, otherwise based on your interest. Okay, and also it makes apps and websites smarter and more useful, and it can analyze huge amounts of data and provide solution, especially in healthcare. It can it can help doctors.
+Does find new treatment options or summarize the patient records, OK?
+And.
+Industry applications, OK.
+So, in industry applications, uh, you know, nowadays, you know, all industries, all domains, we, they are all started to, you know, use, uh, generatively that is AI tools.
+So imagine, no, so we can say that just to imagine generative AI, a smart assistant that doesn't just answer the questions, but can create new things like writing an article, designing logo, or even suggesting the business ideas. So every industry like healthcare,
+I think he also just mentioned, yeah, healthcare, banking, retail, manufacturing, and entertainment. They can, they are all using, okay, they can use generative way to work faster, smarter, and more creativity. Okay, and so instead of spending more hours for the no writing or summarizing or creation of the report.
+He can give a first draft or quick insights in a second. Okay, so that doesn't mean like, no, it replacing the humans, but helps them save the time and focus on bigger decisions. Okay.
+So, gender 2A is like a super creative assistant. It can write, design, and even suggest solutions for businesses. So industries are using it to speed up their work.
+And they are using it to help with the creation of financial reports, and hospitals use it to prepare documents, retailers use it to predict customer needs. But with all this power, we also need to be very careful. We must protect privacy and prevent misuse. It can be a game changer, but only if we use it wisely.
+Okay.
+Okay, now let's see about different platforms. Okay, very first thing I have added that to ChatGPT because everyone has using that one. It's created by OpenAI. That model actually now that is GPT-5 is there. Okay, I have mentioned GPT-4 and Turbo. Now we are having our new updated version that is GPT-5.
+Okay, so this is very advanced chat bot, okay, that can help writing coding, learning and problem solving. So that is there, you know, that model strength, okay, strong general purpose reasoning and creativity.
+And GPT represents, you should know that generative pre-trained.
+DPT means generative.
+Pre-trained transformer.
+Okay, so that means it has no read a lot of information and can generate new text based on it.
+Okay.
+So we can say this is a super smart digital assistant. It can write, answer questions, help with coding, even summarize the documents. Okay, so special thing is it's not just for chatting. It connects with apps like Word and Excel. We can upload that and we can get the results even the PPT.
+Everything. OK, so you can use AI right where you work, whether you are a no professional or you are running a business. Charge a pretty has saving time and improve productivity. OK.
+And about Gemini, that is Google's one. Okay, Google DeepMind one. It's similar to ChatGPT, but it's developed by Google one. I think latest version, I think so that is Gemini, not sure about that, okay, Gemini 1.5 model is there.
+So it's built to work closely with Google Apps, okay, and services. That is the main strength for that. And long context window is mentioned that that is up to 1 million tokens is acceptable here.
+Okay, it handles the big data. Okay, huge data. That means it can process very large amounts of information. That is the meaning of this one context window up to 1 million tokens, meaning it can handle very long documents or conversation. Example, it could read and summarize a 300 page report without breaking it down into smaller.
+pieces or chunks, okay? And multimodal capabilities, that is image, audio, video, inputs, be there. Unlike some kind of AI tools, you know, some kind of tools that can only work with a text, okay, or images kind of thing, but Gemini can understand and generate text, images, audio, and even.
+Reddy.
+Yeah.
+So it is designed to work hand in hand with the Gmail documents and sheets. Okay, so it feels like an assistant inside the tools. We already use everybody like Copilot. Copilot is created by Microsoft and only that this one is created by Google. So we can integrate with the Google applications. Okay.
+Yes, send about cloud. It's created by Anthropic. Okay. Current version, I'm not sure that is cloud 3 I mentioned. Oppos is there, Sonat is there, HiQ, different kind of no versions will be there. This is another big player in the AI space. Okay, now we have cloud worker also be there, a lot more advanced functional.
+has been added. We can create the agents, we can do the triggering one, everything. And our strength is it is safety. Okay, Cloud is known for being one of the safest AI tool because of its constitutional AI. Constitutional AI means which follows clear ethical rules, rules, okay, to reduce the harmful or biased answers.
+If you ask something unsafe, Claude is more likely to refuse politely.
+OK, that's why we are saying safely, you know, safety is there, and it can handle large documents. OK, it can work with very large input context window is 200K, not like a Google one, that is a Gemini one, 300. This is a 200, that is a 1 million, this is 200,000 tokens. OK.
+And hundreds of pages or documents we can upload it here. And strong summarization reasoning abilities will be there. Okay.
+and use cases mentioned, legal analysis, research support, enterprise users. So we can say that.
+The cloud is also like this one, Gemini one, but it is made by Anthropy and its biggest strength is safety and reliability. It's designed to avoid giving harmful or misleading answers. And one more special feature is that it can handle very long documents, making it a great assistant work.
+legal tips or researchers or we can say enterprises that deal with thousands of pages of text, you know. So Claude is like a very safe and careful research assistant who can process huge amounts of information at once. So like that we have many tools, you know. The last thing I have added Grog.
+So, Grog is not an AA model like ChatGPT or a cloud. Instead, it's a special hardware platform, OK, designed to run AA models extremely fast. OK, so just you think like it is an engine that powers LLMs, OK, large language models like LLAMA.
+Mixture or gamma. OK, uh, llama models know that whole llama will be there. OK, uh, so under that we can program that llama models kind of things, and also that clock or so main part that is know when you are doing that learning thing now when you are creating an agents at the time.
+You can use Crop API instead of ChatGP to Open API. That is a free version, I'm saying that. Okay, if you are using that, means Crop or API key will be performed very well compared to that opening, but accuracy will be less. Okay, because that ChatGP to OpenA free version, many times it will not work.
+Properly, when you are creating an agents using that API, and the time we can go with the Grok API, OK?
+That is the main advantage of Croc.
+As a group models, OK.
+So we can run a models without long delays. That is the main advantage of this one. Apart from that, we have a lot more that is no perplexity is there and.
+I think some more is there, okay? Yeah, here I have chosen only four things, that's ChatGPT, Gemini, Cloud. So there's not a model, it's not a model, only Groc is a model, other things are not a model. And we can access it, you know, through website, no web applications, otherwise API.
+And closed models. OK, that's ChatGPT is a closed model. It's available only that open and Microsoft. And this is a Google Cloud API. Vertex AI is there and Cloud is Cloud API and Amazon Bedrock. And this is open model, no. Grog is an open model like Lama and Mistral. So that's why I'm saying that when you are learning that you can use the Grog models.
+K.
+Instead of other things that open a case.
+Yeah, there you go. It's all about this introduction to Gen JTV.
+Now, let's see about transformers, OK?
+Sweta.
+Yeah, I'm not tell about that class attention. OK, we'll see about introduction to transformers and difference between sequence models means that the RNN and LSTM and transformers, then use cases, transformer architecture, self-attention that is in main part. Also, I have shared the document, know that attention is all you need.
+Okay, that that self-attention, everything has been covered. So let's see about transformers first. Okay.
+This is traditional architecture that is RNN, sorry, traditional encoder and decoder architecture. So we have discussed about that now, what is encoder and what is decoder kind of things.
+Okay, the same thing, encoder is helps to understand the context and decoder is not generate the decoder block in between that latent space will be there, the state will be there, then that compressing process will be happened. Okay, then in the decoder, it will generate the context.
+OK, so this is the sentence input I am passing over transformers or great experimentary symbol, and in the encoder it will understand that context, then it will go on to the decoder block and there it will be know that a translation happened, OK? The transformers in different language, OK? Or is considered as a syngent across setting, some kind of thing, some language, OK?
+So this is traditional architecture like about encoder and decoder one. Now let's see about transformers.
+So, transformer models here given transformer based many of the LLMs. OK, not all models. I'm saying that many of many of the LLMs are having the transformer architecture. OK, so transformer based models are a revolutionary development in the field of natural language processing. So, you should know about natural language processing.
+Okay, or because I'm saying that NLP, if you know about that, then only you can easily understand how the text to pre-processing will be performed. Okay, that's why you should know about NLP, natural language processing construct. So a lot more techniques will be involved, stemming.
+lemmatization, any one of the technique you should know, tokens, stock words. Okay. Regular expression will be happen over there because text free processing means we have to clean up the data. Okay. It's land like structured data. Okay. Structured data means we know that the missing values outlet, treatment, all those things will be performed.
+but in the text and structured data. That will be a little different. Okay, so text directly, we cannot pause it over to your model. We have to convert it into a number, no, that is a vector. Here we have to consider as a vector transformation. That is known as embeddings.
+This is important concept, embeddings. That is a word embeddings, we are saying that. So in different ways we can do that, okay? We can convert it into, especially we are having word to work. So later you just go through this, if you want I will share the document on this today itself. Just you go through that one, okay?
+These are all the processes required when you are using machine learning models or even that RNN or LSTM models. But in a transformer, the embeddings only required, okay? It's not required all other things, stemming, lemmatization, stop words, so those kind of cleaning processes not required, okay?
+Okay, so that's why we are seeing the development of that, you know, in the field of NLP, the transformer is known as the updated version of that kind of things. And you can go through this document, then you can get more understanding on that. Attention is all you need. Okay, it has been introduced by that paper or article. It was a...
+published in the year of 2017. So unlike traditional sequence models, so traditional sequence model means we know that RNN, LSTM models, here that sequence one by one word will be passed over to that model and it will do the processing and pre-processing and generate the output, so not generate.
+predict the output and given the output. But in a transformers, no, that is the parallel way that words will be passed over, that all the sentence will be passed over there, and immediately we can get the results. Okay, that is the difference between sequence models and transformers.
+Not quite.
+Okay, self-attention, but for that, I'm just showing that architecture. Okay, so this is the transformers architecture, or we can call it as no LLM architecture, which are the models are having that transformer architecture. We can call it as an LLM architecture.
+Sure, OK.
+So transformers are nothing but, okay, it's like we can say super smart librarian. Okay, super smart librarian, know that who can read an entire book very fast and still remember the important connections between words, sentences, and even chapters.
+So unlike the models, RNN or LSTMs, that read text one word at a time, so transformers can look at all the words at once and figure out which ones are important to each other. Okay, so here we should know what is the advantage of transformers. The recent days we are not going with the tokenization or stemming, I mentioned that, no.
+those kind of process and especially that is we are going with the transformers. Why? Because in that LSTM RNN, we know that if you are comparing that RNN and LSTM RNN is short term and LSTM is a long term. But long term means we know that very long back if some insurance happen and we can connect with this.
+Now, that means we can go with LSTM models. But there are also some lack I mentioned that no, there is a sequence model. That's why we are going with the transformers.
+Okay, so you should know what is that meaning of sequence by sequence model. That means sequence, that is one time one word will be processed. Okay, for that prediction. But in transformers, if you are pausing one by word, sorry, in a transformation, we are pausing that entire sentence, okay, entire context.
+context oriented content. Okay, it will be passed over to there. It reduce the time as well as know, gives the more better accuracy. Okay, and also if we have huge data, transformer is the best suitable one compared to the sequence to sequence models like RNN or LSTM models.
+Okay, so that's why we are mentioned the transform based models are revolutionary development in the field of NFP.
+Okay, please read that article. Attention is all you need, then you can get more understanding. And if you want, I just open that. This is that attention is all you need paper. And here it gives that interaction neural network and the background of that and model architecture. Okay, encoder, decoder, all know indeed.
+Until you can see that, OK? You just read that paper and get understanding.
+Okay.
+So this is the architecture. So from this architecture, let's see what are the things you know, what are the things you don't know.
+Okay.
+So, if you look at that...
+Yes, so starting from here, no, I'm saying this is the encoder architecture, and this is encoder one, OK?
+So.
+In that encoder inputs, the text will be passed over. We note that.
+Do you know input embody?
+That is a word embeddings.
+Esarno.
+Do you know word embedding?
+
+Harshit Raj   56:40
+Ma'am, converting word into a vector form in.
+
+Nithyalakshmi Muthukaruppan [UNext]   56:43
+Yes, absolutely. OK, we need to convert word into vector format that is known as word embeddings. OK, directly, we cannot pass that text, you know, as it is that input value, so we have to do the conversion. So, the text to data and unstructured data, know that will be converted into vectors. OK, so word embeddings is a way of...
+Represent the votes as vectors, or we can call it as the numbers, OK, so that that machine can understand the languages.
+But we have to convert it into meaningful vectors - that is the main.
+Okay, for an example, if I have a word doc, then it will be converted into a vector like this, 0.21, some vector values are on that in the 0.79, the dimension will be there. How many words are there based on that, the dimension will be there. Okay.
+So, why that word embeddings is required? It captures the because different techniques be that that is about to wake and like that. OK, so it captures the no relationship meaning as well as.
+Because other techniques also be there. I hope you heard about that TFIDF count vectorize. OK, all these techniques are there. Depends on your requirement, you can go with that. If I want to understand, if my model wants to, I want my model should understand the relationship based on that, you should convert.
+That means we have to go with word embeddings, word to vex, so there the relationship also will be captured, okay? In other models, just to the count of that, you know, based on that count, otherwise, occurrence based on that occurrence, it will be captured that it will be converted, not captured, converted into vector format, okay?
+OK, so each word will be considered as an embedding vector. OK, then these vectors are now pass over to the model, then model process them output, I don't know, generate the content meaning based on that being. OK, so go to work or love later, you just refer these kind of things. OK, these are the technical models we can use.
+Okay, okay, word embeddings, that is an input to embedding. Okay, that will be happen. And I think you don't know about positional encoding. We will look at about that. And A multi-head attention, that is a self-attention concept we need to look at. So this side I will write it on what are the things we need to discuss, positional encoding.
+Then, self-attention, so there we have multi-head.
+Attention.
+and masked.
+Multi-head attention. OK, so these things we need to understand, and what about this add and now?
+We know about that adding and normalization.
+In deep learning, we have seen that, no?
+The same thing only, and and no.
+That is a key step in the transformer models, okay, especially the GPT models or BERT models.
+It combines residual connection.
+The residual, we know that, no, that error.
+residual connection and
+Normalization, that is a layer scaling part. OK, normalization.
+Okay, the residuals, no, the residual connection helps to know, it prevents the information loss, okay, for new deep neural network is that means if you are using the digital connection, then no, that we can get the better trainings, okay?
+And the normalization, we know that.
+It twice happened, that is inside of that, no, that is feed forward happened before and after it will be there. Feed forward means that is normal neural network, no, that is ANN, artificial neural network model, that is known as feed forward neural network. Okay, so add means I'm adding the residual, that is.
+Like, no ad, we are saying.
+If I'm giving input to vector.
+X OK, input vector X is there means attention. I will explain that. OK, attention output some value a of X, then add means x + a of X. OK, then normalization means cleaned output will be compared.
+OK, that add and keep original information, OK, and stabilize the learning process by performing the normalization. So, this is also, you know, that the feed-forward is artificial neural network models will be.
+Then come to decode.
+OK, the decoder embedding, sorry, yeah, OK, output embedding, we have to do that, that word embeddings like that, portion encoding will be there, sorry, portion we don't know, and we need to learn this, this one we know, and add and norm, feed forward, add and norm, and linear and softmax, do you know about that?
+Linear and softmax.
+
+Harshit Raj   1:02:28
+Activation function.
+
+Nithyalakshmi Muthukaruppan [UNext]   1:02:30
+Yes, they are an activation function. OK, so...
+That is appear in the end of a model. OK, it helps to not change that internal representations into actual predictions, so words or classes. OK, linear, actually that linear layer, that means a linear equation will be used there, W X + C kind of things, W X + B or something.
+It's the way it's bias will be that it converts no features hidden features into this course. OK, input vector into a linear representation. OK, like that numbers 2.1, 0.5 minus, so we can add on point, then it will be converted into a probability value.
+OK, because generative model is known as a probabilistic model. OK, based on the probabilities only, it will generate or create a new board. It will predict the next board, not a deterministic model. So, the softmix function helps to predict that gives the probabilities. OK, EA by 1 + e to the power is like that, and that is not a...
+Soft match, soft match, miss.
+E to the power is that divided by summation of east to the power C, like that, OK?
+Now, make the all values between zero to one.
+So, these two are required for your GPT, GPT models. These two things are required. OK, so we should know that why the probability values are required. Generative A returns the output based on the probability value. OK, highest probability values. OK, so very few things you are not aware of it. Other things are not based on the neural network model.
+We know that residual is how to connect that, no residual is adding that, not that is nothing but that residual connection is adding adding that output of that and the previous no values and feed forward we know that artificial neural network models we have to learn word embeddings we know that except that portion encoding self-attention concept.
+Okay, let's see about that. What is personal encoding? And what about, you know, self-attention?
+This.
+Floppy.
+Here I mentioned that input portion encoding and then encoder attention mechanism feed forward work and the decoder multi-headed attention layer normalization here residual connection or add. OK, that will become with that, then output will be performed.
+Soon.
+This is a simple one, you can answer that.
+Input embeddings, so, and we will get this OPPT. You can refer that, OK, that already I mentioned that, OK, converting boards into a vector format and positional encoding. OK, so positional encoding here, I mentioned that transformers are no parallel way of not parallel kind of models, a parallel way that all that.
+text will be passed over to the model and it performs that. No, that input consists of not a single word, it's the entire text will be passed over there. So the model should understand the position.
+Okay, which word come first kind of thing. So the mission wants to understand not just what words are there, but also their order in this sentence. So that's why we have to use, that means that model cannot read, that model is using that portional encoding. Okay, that portional encoding.
+tells about the order or that no position of that words.
+OK, it adds some extra information to the code to show where each word is in the sequence. OK, so...
+Motional encoding is how a transformer model knows the order of words in a sentence, because transformer processes words in parallel. So they don't naturally understand the sequences like first, second, and third. For an example, if I'm considering that word sentence dog,
+It chased a cat. OK, our cat chased dog.
+Another one, like this.
+Same words, different meaning, only order changes. Okay, the meaning also change. So without personal encoding, model sees words, but no, not their push. So mislead the results. Each word, it will have no convert into word embedding. After that,
+Add no positional encoding, give the position information.
+OK, the output will be known that after this step, it will have that embedding plus positional encoding. That position also will be added.
+And that is the meaning of personal encoding that is required, like a GPT or a BERT model.
+OK, the formulas are not required inside that mathematical formula will be used.
+Okay.
+And.
+Next thing, encoder, we know that, anyway, just explain that.
+Yeah, next mission gets to work on analyzing the send and creates a bunch of memories to remember what it has read. So their attention mechanism will be performed. So the mission pays more attention to some words depending on their importance in this sentence. So model should understand that, no, where I have to pay more attention, which word I need to pay attention to that.
+Okay, then only that model will be no after paying attention to words, the mission thinks hard about each word on its own. Then only we can apply that to model, feed forward model that is ANN models we can pass over that. So we should know about attention mechanism. Okay, what is that attention mechanism?
+Then I added, or...
+OK, let's see attention.
+7:45, I think, and...
+It's about to see their self-attention is here, yes.
+So, self-attention means that is attention mechanism. OK, that is nothing but that attention mechanism.
+Because in under that self-attention, attention mechanism is come there.
+In that attention mechanism, we should know about the key terminologies. I think in the next slide it has been added. Yeah, query vector, key vector, okay.
+Before that, a definition I mentioned.
+So name itself, we can understand that attention. Okay, it's a key component of NLP enables the network to focus on particular words or phrases in a sentence for improving context and understanding. So example, while reading a novel, you some intentionally focus on the current page and recall earlier events, characters and clues. Okay.
+So, this context helps you understand the story better and predict future. So, for that, you know that attention mechanism is required. That do I give, I have to give more attention to remember or to recollect the context. OK, the words or the phrases or sentences kind of things, sort of meanings. OK, so in that self-attention, we have our attention mechanism. We should know these terminologies that is a
+query that is a query vector everything should be no consider as a vector key vector under value vector.
+Okay, so attention mechanism is to calculate the attention weight between the query and key vector and then use to strengthen the value. This is the process, okay? Attention mechanism means we have to specifically not be that model will understand, will identify that which is the query vector, which is the key vector.
+and how much strength, what is that weighted sum of that only scoring will be calculated. Okay, by applying the scaling technique, all those things will be performed and based on the scoring that the weighted average or weighted sum will be calculated. Based on that, it will decide where I have to give more attention, how much attention I have to give it to that particular board or a sentence kind of things.
+OK, so we can say that at self-attention means that secret, or we can the secret power of transforms.
+So just imagine if you are reading the sentence, like the cat sat on the mat.
+Because.
+It was...
+Like 2 sentence like that, you can make it as OK. OK, if I have the sentence like that, very small only, and now when you see this, your brain knows it represents or it refers, OK, represent or refers to the cat. We know that OK, the cats are on the mat because it was tired, so it means.
+Here, it points out through the cat, if we know that our brain immediately identify that in the same way, transform into.
+It pays the attention to the right word, cat, not just to the nearest one, mat.
+OK, for that, attention mechanism is required.
+So, transformer also performs in the way of human brain.
+Okay, so it gives the attention of that word it.
+So it gives some attention on that and it identified correctly it represents the cat. So attention is like a spotlight that highlights the most important words for understanding the context.
+Okay, while that previous slide, no, I was shown that reading a novel simultaneously, you have to focus on some characters. Maybe our brain also, no, we forgot that name or no, some kind of characters things or some incidents, but that models will not do that. Why? It uses the attention.
+Mechanism, and no, keep it in that memory.
+OK, so attention is the spotlight to highlight the most important words for understanding, so that is required for your encoder architecture.
+So the transformer should understand that, no, that importance, which word is referred to that.
+Okay, so for that, we will see after a break how it performs, no, how that weighted sum attention weight will be calculated using these vectors. Okay, I will show that, and then I think we will move on to the prompt engineering and the hands-on part.
+Okay, so now we just go for a break.
+And.
+Because I think one days were not enough. No, that is a two and a half was not enough to understand about LLM models. OK.
+So, it requires at least four hours.
+But very basic concepts you should know, the terminology, the concepts, everything you should know. Okay. Yes, go for a break.
+Yes, shall we continue? Please confirm are you all there?
+In.
+Okay.
+So, let's see about a patention mechanism that is core key and value vector.
+So here each word, all we are saying the token. Okay, we have to split up, you know, the intended sentence. We have, we can split up into words. Okay, they are calling us a token, token of words, a token of sentence kind of things. So each word or every word in this sentence is turned into.
+Three vectors, fully vector, and...
+To.
+Stop.
+Okay, so 3 vectors, they are nothing but their mathematical representations.
+that help the model understand and how important each word is related to the other. So we should know what is that query vector and what is a key vector and what is that no value vector.
+Wait a minute, just...
+Yeah, so just write it down.
+Sure.
+Cori vector, K vector, value vector. OK, so 3 vectors are required. That means each word will be converted into 3 vectors. So, cori vector means what should I pay attention to? So, it asks the question like that. OK, what should I?
+Pay attention to that is your query vector. It's represented by Q and mathematical format is nothing but X into W.
+That is dot product, OK? West Q, that is the weight of the query vector. West represents the weight.
+OK, X is the input that is a word embedding.
+That word, OK, word embedding that is vector representation.
+And do the dot product with the weights of the query vector like that for K, also X into West K, so K is nothing but.
+I am the word you should or shouldn't pay attention to. That is your key vector. That is X dot WK. Like that for value vector X dot WV. Value is nothing but that actual word or information that gets passed forward.
+That is where value vector.
+So, first, we have to create these three vectors on board, each board, then scoring will be performed, and after that, weighted sum will be calculated.
+Okay, so before that, before calculating the weighted sum, scaling techniques also will be there and no softmax function will be applied over there. So weighted sum is nothing but here we are multiply.
+Each, that is a final step, no each value by value vector by its.
+Importance, and then...
+Add all values that is your weighted sum, so let's see step by step. So, the first thing...
+If I'm having a no, the dog chased like that.
+The cat or a ball, OK, the sentence, so if I'm taking this, OK, dog, and just this pad, I'm taking that.
+From this, this dog is and taking this a query vector. OK, query of the code and chase is the key vector.
+Okay, then that attention mechanism helps to understand whether this dog should pay attention to the next one, this one, chased or not. Should that shouldn't pay attention to that. Based on that weighted sum, the model will do the decision and will take the decision.
+OK, and next step.
+You have to calculate this score, so the how the score will be calculated.
+Two.
+Okay, this is different.
+School.
+Is equal to QI OK and.
+Less.
+A J transpose.
+Okay.
+So this is the scope, not plus I think that is dot product. OK, QI dot KJ transpose. Why transpose is required? We know that no, that is a matrix multiplication, the same size of the vectors is that matrix is that means we cannot perform that multiplication dot product. We should make it as no.
+One of the vector has a column vector like it. OK, so that's why the transpose is required. So this is the formula for score calculation. OK, Q is the query of that word and the dog I mentioned and the K is the whether should I pay attention or not to answer that question kind of things. No, sorry, whether I can give an importance to that word or not kind of things. That is the chase.
+If I'm choosing that pair, one pair I'm choosing and I'm checking that. That IM is a model is checking kind of things. Okay? And once you calculate the score of that particular word, then we can go with scale. Like that it will choose another pair, okay? Chase, so then D and the ball.
+dog and ball, okay, so kind of things will be performed. So after scoring, scaling, the score is required.
+So scaling the score formula is this one that is score value divided by square root of some value that is DK square root of DK. Why square root is required? We are making that values into small. And what is the DK is? That is a dimension of the key vector.
+OK, to make that value small, we have to make it a square root of that. OK, this is how we can do scaling process. Scaling process required to know get a good accurate result, as well as it helps to reduce the dimensionality. OK, that's why scaling is required here, and after that...
+We have to apply soft to max function on this.
+Why to convert or make these core values into range of 0 to 1, that probability value. Then only we can identify more attention or low attention for that particular.
+Okay.
+So score will be calculated, score of each pair of word will be calculated, then scaling will be applied on that score to reduce the dimensionality and also to get the better result. Then you can apply the soft to max to compare the scores, whether it is a low score or that no.
+highest score based on the probabilities. Easily we can do the comparison. That's why we are applying softmax to get the values in the probability.
+OK, after that, you can go with the waiters.
+So, weighted sum that is nothing, but that is the final output summation of.
+That is, I mentioned that no attention weight, weight is multiplied with each value vector.
+OK, weight to multiply with value corresponding value or actual value that is your weighted sum, or we can call the saying that attention score kind of things. OK, this is the attention mechanism. Firstly, we have to find out the key vector, Q vector, and value vector for each pair.
+That is D and dog will be selected, D and chase will be selected, then D and cat or a ball will be selected, then it will understand whether the word key should pay attention to dog or chase or cat.
+Okay, like that next pair will be chosen, dog and chase, dog and cat, dog and the everything will be captured and for each pair of where this kind of self-attention, self-attention mechanism will be performed and it that means it captures the weighted sum based on that it will choose whether I can give that attention to that no importance to that particular word or.
+Based on that probability, it will understand and it will know come up with the decision.
+So, self-attention means one pair. I'm mentioning that multi-head attention means like that, no, we have to pass over multiple pairs at the same time in a parallel way of processing happening, no, so that we need multi-head attention.
+That is the meaning of that multi-head attention.
+OK, in that architecture.
+Yeah, multi-head attention is there, no? So attention mechanism performed on all kind of pairs at a time, same time, no, at once if you are doing that process, we required multi-heads. That is known as multi-head attention.
+Okay.
+I guess mentioned here.
+The machine looks at the words in different ways simultaneously. Okay, so for that we require multi-head attach. And layer normalization, we know that and output is known. And one more thing is that is masked multi-head attention that is in that architecture. You should know about why now we know that multi-head attention and
+positional encoding and soft max we know that linear it makes to that no linear value or linear no representation and except this masked okay we should know what is this masked multi-head attention. We know multi-head attention. What is masked multi-head attention?
+So every word in a sentence can look at every other word to decide which ones are important that is multi-head attention.
+Then why masking is required that when we are generating a text step by step like GPT model, the model must not cheat by looking at future words. It has not generated it.
+Like, no, if I'm having that sentence, the cat.
+Sat on the dash.
+So, at the blank, the model should only see the cat sat on the.
+No, it should not see the mat because that's the answer we wanted to predict. This is where masking comes in.
+It's the same as multi-head attention, but with a mask. Mask means we can say that that is a filter applied.
+The mask blocks the filter, blocks attention to any future tokens.
+So, mathematically, if you are saying that in the attention score matrix, the values of our future words are set it to minus infinity.
+So, the retention weight is equal to 0 after softmax.
+Okay.
+So for an example, if I'm having the sentence, I love pizza, when predicting the first word, I, no restriction, only the starting token. When predicting the second word, love, it can only attend to I.
+When predicting third word pizza, it can only attend to I love.
+So the model learns to generate text auto-regressively, one token at a time.
+We can also we should know where we are using that it is in the decoder blocks.
+OK, not using encoder block, since encoders are supposed to see the whole input.
+Okay, so just imagine a particular student doing a fill in the blank test. Okay, they should only use the words already given. That is past content. They are not allowed to, you know, pick at the answer sheet. That is the future words.
+So, the teacher puts a mask over the future part, so they can't cheat.
+So, most multi-head attention is a regular multi-head attention, adding to a rule that prevents looking at future tokens.
+OK, it's the trick that makes auto regressive models like GPT.
+Okay, so now I hope you understood all the terminologies, all the techniques which are involved in the transformer architecture, or we can say that LLM architecture, because many most of the models, LLM models are built based on the transformer architecture. Okay, we are calling the transformer is a no engine of the LLM models kind of things.
+Okay, so if you have any doubts on this, please ask me. Because this is very important when you are talking about LLMs, large language models.
+Or, if it is clear, you please confirm it.
+Then we can move ahead with the hands-on part.
+Yes, any doubts on any functional or any techniques?
+Any terminologies?
+Or is everything clear? You please confirm it, then we will move on to the hands-on part.
+Everyone, please confirm.
+If you have a doubt, you please ask me. I will explain it again. Even that input with the embeddings, that word embedding concepts also.
+S.
+I got one response, Samatha Pradeep. Thank you. He has mentioned. What about others? Any doubts if you are having you, please ask me because this is important to one know when we are when you are learning about LLR. OK, nowadays, no many more large language models are coming over. This is a very basic.
+Thing, and the text kind of models are, you know, performing based on transformer architecture. So, in a transformer architecture, we should know that how it performs, how it generates the output, and why it is required, even though we are having our in an NSTM model, why we are going with a transformer. The main thing is it gives the it generates the output immediately.
+OK, predicts that next word immediately, you know, with the help of no parallel processing. So, in the parallel processing, we should record that parallel, sorry, potional encoding part that is a technique, as well as that attention technique is required, you should identify because parallelly we are passing over. That's why these kind of techniques has been added in the.
+Feed forward, feed forward is nothing but artificial neural network layer and that LSTMR RNN model. That is the additional components have been added in the transformer. That's why we are getting that no very quick responses. Within a second we are getting the responses.
+Okay, I hope everyone understood this.
+Now, let's open that Google Colab. Okay. And sentiment classification one. Okay, we are going to use encoder models only. Okay, so sentiment classification, because tomorrow we are going to use that rag. That also will do that hands-on.
+That we will use the encoder decoder model kind of things.
+So open that notebook and also you need to upload the data set customer feedback CSV. So click on that folder icon and please check that whether you are connecting with that GPU or not. Please make it as GPU. Okay, in the top, no, you can see that connecting. Once it's connected, you can cross verify that RAM and ROM is mentioned, no.
+So there you can click change runtime type. So by default, I have chosen that T4 GPU. If you was in CPU means you please change it into T4 GPU. And here you just upload the data, customer feedback.
+Send.
+Yeah, upload the data.
+So, here we are going to use the platform Hugging Face for the models. OK, I hope you know that what is Hugging Face. Hugging Face is a popular AI company, no, and platforms that provides the tools, models, and data sets for working with especially the natural language processing kind of task translation, no language translation takes some.
+Text generation, or audio, video, those kind of this is a platform to use and share models easily. OK, so especially for a BERT model, if you're going to use GPT, then we can use no hugging phase. OK, there are no in that web that hugging phase itself, thousands of pre-trained models are there.
+Okay, if you open that hugging phase website, okay, just you type that hugging phase. I think you need to sign up there. Okay, later we'll do that. Okay, you just sign up and there you can see different kind of models.
+To.
+It will see this one.
+So here first we have to import that. That means import package pandas. We need to load the data feedback dot CSV and the separator is required here, that comma one. First I just load this and import your data set customer feedback. Here we are going to do the sentiment analysis, no sentiment classification.
+whether it is a positive or a negative kind of feedback. OK.
+Does you look at your data? This is my data.
+Okay, positive, negative. So I'm going to predict that classification task. So I'm just considering that no, only that sentiment to one and store it as a list format that stored under that feedback object. If you look at that, okay.
+only that sentiment column will be stored. So this is very small data set for learning purpose, I'm using this. In real life, we are using huge data. Because if I'm using huge data, it will take more time to execute that code. That's why. And next thing, I'm going to initiate that model. OK, that model, I have taken it from hugging phase. So now you please open that hugging phase.
+No page or a website.
+So, he get up of AI models and tools. OK, we can use it easily and freely, and one I just give a time. You please sign up if you haven't, or no.
+I don't have an account, I don't.
+I just give a time to open that. OK, you need to sign up and sign in the.
+The top you can see that models once you log in, signed in, then you can see that models, data set, you can use data sets also, okay, freely you can use a data set, but now we are going to use the models. And task also mentioned here in the left hand side if you are looking there, no, task if you are clicking on there, you can see multi-modal that is a multi
+no task, we can perform it over there. That is audio text to text, image text to image, those kind of things. And...
+Computer vision that is image kind of task, no CNN algorithm we are using, no for that. If you want particular kind of task, no object detection, if you click on that, it will listed out the models. OK, from that you can select lightweight model or no huge model. It depends on the requirement.
+and also depends on the data set. And for NLP tasks, that text classification, question and answering, text generation, feature extraction, translation, these are all things come under natural language processing. Here we are going to use those things. And audio kind of things, tablet kind of, no, tablet classification, time series forecasting.
+Reinforcement learning, so all kind of task, mostly it covers here. So, based on that, it gives the model. So, here we are going to perform sentiment and there is text classification. So, if you select that, it listed out multiple kind of models, a different kind of models it will listed out that are MB that also be given the size of the model also.
+I am going to set, I have mentioned that document, no, the notebook itself. Okay, suitable model is BERT model. Okay, for classification tasks, the encoder is, no, that is known as encoder type of problem. So there BERT is best one, but I have chosen the Google model. I think the small is not available now, they are.
+You please check whether you are having that or not. Just check this, does she copy and paste it in the search bar and check. Otherwise, I will show that one. Google model if I'm selecting.
+And.
+Yeah, I am getting only two that is base and large model. I don't want to download the nodes or use that large model. It will take more time because once you are selecting that model, no inside of that model, what are all the libraries, what are the functions, what are the data is required, no? It will be downloaded that when you are running that. That's why we are suggesting you don't use your local Jupyter notebook.
+You have to go with the collab or VS code inside of that VS code also you need to create a virtual environment and to run that.
+OK, so for an example, if I open this Google Flantify model.
+The T5 model, but this is actually T5 is suitable for encoder decoder. OK, both kind of thing. That's why I'm saying that if BERT will be best for that encoder only. Anyway, I have chosen this and I also use that what is the default to model or text classification.
+And here, if you look at this, now open that and look at the files and the versions, all these should be downloaded when you are using this particular model.
+OK, so modeler safe tensors, so that is representing no this this file representing as a size. OK, that is maybe it will be T5 some kind of models will have that extension as T5 or safe tensors, so that is 894 NB small data modeling.
+Sorry, small model only, lightweight model.
+Okay.
+One thing you can download and keep it and you can, you know, whenever it is required, you can use that, but that is unnecessary thing. If you want, you can directly go through that. No, I think it's done, copy that model and paste it. Okay, otherwise you need to download all this in your local directory and then you can perform it.
+That is your choice. So here I have used small, but it's working, but it's not showing that. Okay, if you are getting any error means you can use this base model instead of small. Okay, and I have used that default model also.
+Okay, that is bot model. But also you can check that in the tracking phase here.
+Then go that text classification, and that is distilled boat. OK, we type that.
+Yeah, this is the more distilled boat, but this is for language or no translation or text classification, and and I'll use it for this one thing for this text classification only, ohh, this still boat why it is.
+It's not already been used.
+Yeah, any kind of things you can use. OK, maybe this is a lightweighter model you can use.
+Word models, OK, 13 or 14.
+Distill both based. OK, both models you can use in a different kind of models or that based on the size. No, if you want a very small data is there, so very light weighted model is fair enough for that. OK.
+So this is how you can choose the model from the hiking phase. So now.
+Yes.
+Please run and check whether you are you can be able to run that or you are getting any error on that.
+All day I ran this, if I'm running that, it will take, but anyway, just run and explain, OK?
+So, I have no loaded the pre-trained model. OK, it is especially it is used for that, no, that I have selected classification, the sentiment task, even the summarization Q&A task, it will be performed there.
+Okay.
+Yeah, token is not existing. That is OK. The warning message like that, it is showing there.
+That is API I have, I haven't used, you know, that's why it's telling about that.
+OK, now I import a auto tokenizer auto model for sequence to sequence L from transformers module. OK, so why that is required?
+Auto model for sequence to first auto tokenizer. So auto tokenizer is required to convert text into tokens. So there are numbers. Okay, that is a vectors kind of thing. So hello if I'm having that means it will be converted into a vector format of that. And auto model for sequence to sequence LM.
+That is sequence to sequence model I am loading here. It is used for translation, summarization, question and answering, but OK, and from that auto tokenizer, I'm using from underscore pre-trained model.
+OK, that is a pre-train from underscore pre-train and the model name already I defined that now I'm using.
+Then I create a model. So this is for auto tokenizer.
+And I'm creating a model for that. I'm using auto model for sequence to sequence yellow.
+OK, I'm downloading that now. Pre-trained weights, so not I means that a model will download that pre-trained weights and build the neural network. OK, it takes the tokenized input and generate the output text by using that given model. So for that, I'm using auto model for sequence to sequence LM and from underscore pre-trained and model name.
+That is a Google Frontify small model has been selected.
+So, tokenizer is nothing, but it reports the text and this one, no model process it and generate the out.
+Now, if you look at that, no, these are all the things comes under that model safe tensor I shown that, no, so all are downloaded here if you're running that model.
+Yeah.
+So that's why I have chosen that lightweighted model. If you are selecting a future model, means it will take more time to download that. Okay, execute that one. So these are the optional one. Already I have explained this, no, that is if GPU is available or not, whether we need to check that, means you can use these two lines of code. If it is not, that means you can go with CPU, otherwise use that GPU.
+OK, this is optional code.
+Now, here I have applied known BERT model.
+Okay, that is from transformers. I'm importing pipeline, pipeline model. Using that pipeline model, I can use default, no, that is a default classification model or pre-trained model. Do you know about pre-trained model? I'm just mentioning that pre-trained, pre-trained. Do you know about what is pre-trained model?
+Yes, do you know about pre-trained model?
+Okay, pre-trained model means nothing, but already know that model has learned by weights. Okay, and also the researchers, they found it for some kind of task for a particular task. We can use this kind of models because already that model has been trained, the framework kind of things. Instead of training your model from a scratch,
+You can use that pre-trained models, OK? Using that on your data, then training is not required there, OK? Already that weights and bias has been learned, so using that you can get the um results, OK? So ready-made kind of things that is pre-trained model like that in that hugging phase also we are having a lot more pre-trained models.
+So, one of the model, no, we have used that to Google plan and this was the here I have used by default it is taking that this model English and no this kind of that one case fine tuned SST model has been used and also it is displayed that a predicted value that label as like that ninety-nine percent of this raw over fitting kind of thing, so sentiment is positive ninety-nine percentage giving that.
+Okay, I didn't specify that model. This using that pipeline, that is a ready-made kind of function. If I'm passing over the task sentiment analysis, then it will take that by default that both models.
+Okay, otherwise here itself you can specifically mention that model name that is Google plan or T5 you can mention that.
+Okay, so this is one of the technique you can use it. Or earlier I have used, you know, that is Google plan T5 small model. So the same model I'm going to use, but here I have created a function. From that function I can do the prediction. Okay, so here I'm creating a predict underscore sentiment function.
+And inside I pass over the text, the data, then temperature argument, top underscore P and top underscore K. So these are all no control the output randomness. Temperature, top, okay, and top underscore P, that's a probability.
+And the top underscore K, so these are all known as control. OK, control the randomness, especially the model now will get the randomness when it's generating the new output, so it reduces that. So let's see about that threshold value. OK.
+So, about temperature?
+Here I have mentioned points already, we have discussed about that, a temperature. So temperature controls the randomness in the model output. The low temperature is safe, okay, predictable output. High temperature, the highest value if you're giving that means it creates, more creativity will be added. So random output will become over that.
+So normally 0.02, 0.3 if you are giving that means that will be very deterministic. Same answer will become there. So above 0.3 you can give like 0.5 or 0.6. Okay, that is a balance to one, even 0.7 or so. More than that will give that more creativity in your answers or in your results.
+Okay, more than one if you are giving that is very randomness sometimes you know that nonsense kind of output will come there. So better is 0.5 to 0.7 or 0.5 and 0.6. Okay.
+Okay, now.
+example, if I'm giving that no one or above of 1, if I'm giving in the sentence of the dog chased the, then it will give the prediction as kind of the no ball in the park.
+Okay, sorry, not 0.7 if you're giving that ball will come. And more than one if I'm giving that means maybe it is a irrelevant content will become over there like butterfly can some kind of things. Okay.
+Okay, and next thing is top underscore P.
+Okay.
+So that is also controls the no randomness of the output.
+But that represents the probability. OK, top underscore probability is equal to 0.9.
+It controls how many possible words the model considers when generating the output based on the probability value.
+Okay, so top underscore P selects the smallest set of words whose total probability is more than given one. That is a 0.9 I'm giving that, no? Suppose a model predicts next to word probabilities, that's a ball will be 0.5, dog will be 0.2, cat will be 0.1, car will be 0.1.
+or sky will be 0.00, some kind of things. Okay, from that, if I'm giving that top underscore probabilities 0.9 or 0.7, okay.
+then it will take a combination of two, okay, ball and dog. If I combine that, it will give the probability of 0.7 or 0.9. So only those words will be considered. Okay, for that, we can give the top underscore probability kind of things.
+Okay.
+So it avoids to that no model randomly selects from that values. No, it prevents from that. It will select it from the filtered group. So higher probability votes are give the good results kind of thing. So we can choose above of.7 as the good result or balanced one kind of thing.
+OK, maybe 0.9 also will not be suitable, 0.7 or 0.8 you can choose and top underscore K.
+We know that top underscore P and no temperature and 3rd a parameter or argument that limits the model to consider only the top K most probable words when generating the next word.
+OK, chooses from the 50 here; I mentioned no 50 highest probability votes.
+Okay, not everything. It picks only two or picks only three from that no top probability values having that no that values will be listed out of that or next to board from that it will pick only three or only 50 kind of things.
+Okay, so words outside of that 50 know will be ignored. It reduces the randomness, know it reduces the dimensionality also kind of things.
+Okay, so 50, less than 50 is okay, more than 50 is not advisable. Okay, it's a very large kind of things. Even you can try with less than 50 of that. And next thing is prompt we have to give, okay, proper prompt we have to give it to get the proper result. Then tokenizer, the same process we have to give.
+And here we can use model dot generate. So model means already I have defined that model by default, by automatically it will take that to models. And generate the input and maximum tokens I have mentioned and temperature is you can take this temperature to reduce the creativity, then top probability, everything, all the parameters I have added inside of that.
+OK, and store it and it outputs, then I can use decode method from the tokenizer to generate the output.
+Okay.
+So I'm mentioning that outputs of 0 and skip underscore special tokens true.
+So the skip underscore special tokens means it reduces the dimension of that, that is skipping the special characters. Okay, the tokens means the special symbols will be there or sometimes the stop words also will be removed over there. Okay, that is that meaning of the skip special tokens equal to.
+Okay.
+And yeah, this one also I forgot. This is reduce the diversity, you know, do sample equal to false.
+That is model will not use randomness. OK, seed kind of things. If we are setting that seed, no, and that kind of things, we can use this. But if you're using that means we can avoid these kind of things. OK, this is optional one day otherwise.
+If you want randomness, you can use do underscore sample equal to true, then you can keep all those things like that. So for understanding purpose, I'm adding this one, otherwise it's this is not required one. Okay.
+Okay.
+And...
+Yes, keep underscore everything I mentioned, if I run this.
+Yeah, and that now I can use this function, so this is not required. I just...
+Do you?
+Yes.
+This is the original list. Now I am predicting that.
+OK.
+So using that function, what is that? Okay, text is not there. Okay, I have to select that text. Okay, from that data, text is there, no? In that list of format I have to select, then I can do the prediction on that. What is that, name error?
+Same device is not fine. What device?
+Organizer.
+This is not.
+Just showing it all.
+Okay.
+Any other cells? OK, OK. Sorry, device I have used to know, that's why, OK. Sorry, import then it should, OK.
+Here I mentioned that's why it's required. Otherwise this is so optional one. OK, so I have mentioned that you can use that model. No, that is a GPU one. That's why here also I have used. OK, otherwise that is not required. Here also I have used that.
+Okay.
+Now, I just generate this, yes.
+Okay.
+Now I'm storing that.
+Slot.
+And it's showing that results, I'm storing that predictor sentiment, uh, the predictor values under predictor sentiment, or no.
+You can see there.
+That is a predictor underscore sentiment. Yeah. So this is actual one and this is predicted one.
+OK, so this is very less data, that's why you know I have used lightweighted model, but in a huge data, if you're using lightweight model, maybe it will affect that accuracy. OK, at the time you need to go with the huge model, and also it depends on the requirement or a task. OK, so like this, we can do that, we can apply here, if you look at that, no only ninety-six observation.
+K.
+Okay, and conference score earlier it was there.
+And I have added this one, so in this way we can use transformers, no transformer models that LLM large language models to do the classification task. There is a sentiment analysis task.
+Okay, for this data, this is not required. Learning purpose, I have used a very small data set. Okay, you need to select that model and tokenizer, auto tokenizer is there. So it's not required to do manually any kind of cleaning task, but in not no NLP task, usually we have to use stemming lemmatization or removing stop words, applying the regular expression to.
+clean, special characters, everything. So manually you need to spend some more time to do that process. But here it is not required. That is the main advantage of that as well as that no parallel way of the task will be happen. OK, so that is very helpful to get the quick results. That's why nowadays, no.
+every models, that AI models, we are going with the AI models because of that LLM architecture.
+Okay.
+Okay, I think now 850 I don't want to cover that prompt engineering hands-on. Anyway, tomorrow we will do that prompt engineering part. I have shared that document. If you have a time, you please run and check that. Otherwise, no issues. Tomorrow I will show that because already the concepts was covered, you know, concepts were covered in that self-paced video.
+Same thing, I will show it in that hands-on. Their bot model I have used, it will take more time, so it's better. You just run and see and talk. Okay, then I will explain that, then we will move on to the rag concepts. Okay.
+Okay, any doubts on this? If you have any doubts, you please ask me.
+Because this is very no important concept, so now we are in this stage, you know, generating a model, everyone we are using that, so you should know how that model is works in the back end, how large language models is performing, how that architecture works there, and how we can use that models, you know, libraries.
+OK, auto tokenizer or sequence to sequence model.
+And classic model also be there. This is sequence to sequence model and classic model tomorrow I will tell about that one.
+Less data, that's why I have you sequence to sequence mode.
+Okay, no doubts.
+Okay, please go through that. Okay, even that document to know that is self-attention and also about RNN, CNN, LSGM. So just go through and get more understanding on it. Then you recollect these terminologies about the transformers. Okay.
+Okay, now I think I can wind up this session now.
+We will connect tomorrow, OK? Thank you.
+Thank you, Ravi.
+
+Ravi Kumara [UNext]   2:17:45
+Thank you, Nikam. Thank you, all. Any questions or anything to ask?
+If you have any questions, yeah, I can feel free to drop off and we'll catch you on tomorrow, but the last and final session of the program, so please do not miss it tomorrow's session.
+Goodbye.
+Get some tomato.

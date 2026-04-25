@@ -1,0 +1,782 @@
+
+Ravi Kumara [UNext] started transcription
+
+Ravi Kumara [UNext]   0:09
+Hey, good evening, good evening, Paul.
+When are you doing?
+
+Harshit Raj   0:16
+Good evening, sir.
+
+Ravi Kumara [UNext]   0:18
+Banning our shades.
+
+Prem Deep   0:20
+Good evening, sir.
+
+Ravi Kumara [UNext]   0:22
+Hey, good evening, Pam.
+Running with them, running everyone, yeah, running on.
+
+sudarshan kumar   0:28
+Play.
+
+Nithyalakshmi Muthukaruppan [UNext]   0:32
+Yeah, good evening, Ravi.
+Good evening, everyone.
+
+Ravi Kumara [UNext]   0:40
+I'll come back.
+Back and yeah, the last day of the training program, so today you guys know right? Today will be the last day of the training, so we reached the 50th the day of the training, so 49 sessions completed as of yesterday. Yeah, today will be the last and final session, which is the 50th session.
+So I recommend all the, I mean, yeah, as I need all the participants to be there throughout the entire duration of the sessions. So towards the end of the session, I have some couple of announcements to do. So please do not log off or please do not go from the session. Okay. So I request all the participants to be there and consider it on the today's topics.
+So, as the determine completes part of the day, then...
+I need some 5 minutes of your time for the closure announcement.
+Alright, team, yeah, this not can we get uh started?
+Can you have some thumbs up?
+Okay, I can see some thumbs up. I'll see that.
+All right, team, so as usual, please be attentive, please be interactive and engage in this session and be responsive. So please ensure you did on the entire duration of the session. Anytime I think we are good to get started. So meanwhile, please team, all of you log into the LMS and you can download the today's play session file.
+Yeah, I'll keep it handy, so when that's what I'm asking, and then it can load that file.
+There it go, wait.
+
+Nithyalakshmi Muthukaruppan [UNext]   2:27
+Yeah, thank you, Ravi.
+OK, let me share my screen.
+So yesterday we discussed about that no LLM models introduction as well as that architecture of that LLM model, especially the transformers.
+And.
+We have done that hands on for that using the transformer using LLM models. How can we perform sentiment classification task?
+So in the transformer, just I'm doing the recap on that, in the transformer architecture, I have explained that no, the techniques or that no functionalities like personal encoding, then multi-head attention. So can you tell about the positional encoding? What is personal encoding or why that personal encoding is required?
+Yes.
+
+sudarshan kumar   3:27
+It provides the information about where the word exactly is in the sentence.
+
+Nithyalakshmi Muthukaruppan [UNext]   3:28
+Okay.
+Yeah, the order. Okay, the position. It tells about the portion of the word. Okay, where that word come out first, which word come like that. Okay, so in encoder and decoder in both places, portion and encoding is required. Okay, what about attention mechanism? Or you can tell about that multi-head attention.
+Yes, what is attention mechanism? Or you can tell about that, why attention mechanism is required in both places, encoder and decoder. But in the decoder, we are using that, adding to that attention mechanism that is masked one also we are using.
+
+sudarshan kumar   4:28
+So, attention mechanism is to use for the providing embedding of the word with respect to the other words in the sentence.
+
+Nithyalakshmi Muthukaruppan [UNext]   4:40
+Okay, that means that given giving that attention. Okay, so the model should know where to I give attention because based on that only it will predict like our human brain also immediately if you look at that means we can easily identify that what no word will come next. Okay, based on the train data kind of thing. So in the same way based on that.
+learned data, it will identify, otherwise it will give that attention to the word, next word. Okay, so that is known as attention mechanisms. In the back end, the calculations will be happen like scoring, you know, it will calculate the score and the scaling will be performed on that to know, get the better results.
+And also on that, the softmax function will be applied to get the values in a way of probability to easily compare the values and the score values. And also then finally, we will calculate that weighted sum. So weighted sum is nothing but for each values, you know, that.
+Each values will be multiplied with that attention score.
+OK, so that is attention mechanism. Normally, we are calling that a self-attention and multi-head means, especially the transformers know that we are the transformers perform in a parallel way. We are pausing over, not that model is pausing over all the words at a time, OK, simultaneously.
+So each pair of word, no, it required one attention, one self attention is attention on head. So that's why we required multi head attention and mask is nothing but there is a filtering process will be performed there. OK, it will filter out. I don't know because we are getting.
+More, no, if your data is huge, OK? Large means that means more number of no set of pairs will be passed over this from that it will filter out, OK? That is known as masked multi-head attention.
+Okay, I hope you understood about that, how LLM models work and especially why LLM is required and like, you know, why transformer is required instead of RNN or LSTM models. And also we can evaluate that model with the help of different kind of metrics. So that is metric is known as a Rao metric or OUGE metrics.
+The blue score, so based on that, we can evaluate that models. OK, now today we are going to look at about RAG. OK.
+Let me.
+And this new file and open.
+OK, so rag application that is rag means nothing but.
+Do you know about that rag?
+Have you heard that word, rag?
+
+Karthik  Bysani   7:40
+Retrieval open to generation.
+
+Nithyalakshmi Muthukaruppan [UNext]   7:43
+Yes, retriever, augmentation, and generation. OK, so I just write.
+Retrieval.
+Augmented.
+Okay, that is the meaning of frag.
+So that means in a RAD, 2 operations will be performed, retrieval, and...
+Jindesh.
+So, this is the one of the most important technique in our generative AA and agentic AA field.
+That is no, we should know about no, I am saying that this is it important to one in agent care and as well as the generative aid. So we should know what are the disadvantages of just using the LLM model without rag.
+Okay, and also we should know how we are overcoming those disadvantages with the help of RAG.
+When should we use RAG and what are the important pipelines they we should take a note while developing a RAG application?
+Because nowadays every companies know they are looking for professionals who are, who knows how to build a rag applications. Because if you see various AI engineering reports, then many of the companies around 60 to 70 projects, no, a percentage of the projects are specifically on rag application.
+So, rag is the process of, by definition wise, I'm just saying that a rag.
+Is the.
+Browse yourself.
+Optimizing the output.
+Of a larger language.
+Okay, this is the advantage kind of lag is the process of optimizing the output of a large language model. So it references an authoritative knowledge base outside of it, you know, a training data set, training data set source, okay, before generating a response. So LLMs are
+trained on huge amount of data as we all know and use billions of parameters to generally generate the output for like task, question answering, translating, and completing the sentences. So RAG extends the already.
+powerful capabilities of LLM to specific domain or an organizational internal knowledge based on without the need to retrain the model.
+Okay, so it is a cost-effective approach to improve LLM output. So it's relevant, accurate, and useful in various contexts. Okay, so this is just a basic definition about that RAG. So RAG is the process of optimizing the output of an LLM model. Sorry, LLM, that is a large language model.
+So, let's consider that I have a application, OK? Generative application, and as you all know, in a application, I usually let's say that I have an LLM.
+Like that, okay. I had that large language model. Is whenever we have LLM, what happens is that let's consider that I have a user, okay, some kind of like this, okay, user and user is asking a query.
+Okay, adding with that prompt.
+Okay, and it is passed over to the LLM. Okay, before sending that query to the LLM, we have to add that to prompt. Okay, this prompt is nothing but just like an instruction to the LLM. Like how the LLM should work, no? And then based on this, we actually get an output.
+From this, we are getting the output. It generates the context, so generates the output.
+So by using this specific technique, we give a query and this LLM, you know that it has been trained with billions of data. That is a different kind of data that is available in the internet and based on this, it will be able to generate the output. One of the disadvantage of this
+As you know that every LLM that is trained, you know, it will be trained for a specific set of data. Okay, let's now reason to know that updated was in GPT 5. There is a reason to model from OpenAI. So I hope you know.
+that when this model was launched and this model may be trained with the data till I think September month, I think so 30 September 2024. Okay, till 30th September 2024 it was trained there. So this LLM will not have any idea what has basically happened in the current world.
+OK, current, there is a knows the updates, OK, current office kind of things, so between maybe that first October till now, OK, so...
+If I ask a question, specific question to the LLM, which is between the, I mentioned the dates, not October to now, on the specific dates for any kind of events, the LLM will start hallucinating.
+I hope already I know I mentioned this this word no hallucinating.
+So this is the one of the major disadvantages of only using the LL.
+OK, so this is a major.
+disadvantage of only using LLM, that means without rag.
+When we say hallucinating, what does that basically mean? It means that even though it doesn't have the knowledge, what has happened between 1st October to till now, any kind of events. Okay, if you're asking any questions related to that to the LLM, that LLM will
+Try to generate it. OK, and we are asking to a tool, then LLM will try to generate it own and so because it doesn't want to look like a fool. Anyway, we will do the search in the internet. Maybe in that website any information is not updated. OK, like RBI guidelines, some kind of not updated means.
+Then it will give some answer because that model doesn't want to like a fool.
+Okay, it will try to generate some answers and it will make sure that it will show you answer that you may also have to believe it. That is how it will be written, you know, in terms of the output that we get. So usually this condition is basically called as hallucinate.
+OK, so this is one of the major disadvantages, and the second disadvantage that...
+You have, let's say that I'm using that LLM and you know this LLM has been trained with a huge amount of data. Now what happens is that I'm running, for an example, I'm saying that I'm running a startup. Okay. In my startup, I'm solving a specific use cases. I have some data.
+which again, I need to use that particular data along with my LLM. Okay, so let's say that I have some kind of data like policies, HR policies, okay, of my company or finance policies, my company related data, that is a personal data kind of things.
+OK, that will not be available publicly.
+So, and also the data has been protected.
+Now I also want to use this specific data. Okay, and probably I want to create a chat bot.
+So now how do I do this? One way is that maybe you can now say that like we can take this particular data and we can fine tune the model. Okay, we can simply fine tune the model. Yeah, that is a good solution. But understand fine tuning a model is a very expensive process.
+and also very tedious. Okay, that tedious process. Because this LLM, whichever LLM we are using, it has billions of parameters and tweaking these billions of parameters usually takes a lot of time.
+And, obviously, this is the best better solution like that. OK, fine tuning is a better solution if you want to know, train with, no, train that not train, then LLM model should act, you know, train with my own data, then fine tuning is the best option for that, but this is a very expensive also.
+OK, computationally, that is very, very expensive. Now, just we think about, do we have any other way?
+And also you just remember that all these policies, HR policies, finance policies, all these kind of data will also keep on getting updated. Okay, especially as we run a startup. So every time.
+We cannot just go ahead and fine tune it like, you know, every day we cannot fine tune that. Whenever the data is updated, I cannot fine tune it again and again because that is an expensive one. So we should try to find out the solution.
+Like, no, how do we prevent this?
+So, this again, that is, we can be prevented with the help of RAG. OK, that is another disadvantage of LLM model without RAG.
+Instead of fine tuning, we can go with that rag. We can implement the rag. OK, so rag is nothing but it is saying that it is a process of optimizing the output of a large language model.
+So it reduces the hallucinating. It's not, you know, 100% it will not remove that hallucination, but we can reduce that hallucination as well as instead of doing that fine tuning process, we can use our internal data, okay, that our personal or private data.
+As a knowledge base.
+Okay.
+That's how we can get the better results. So I'm saying that otherwise the definition is saying like that it's a process of optimizing the output of a large language models.
+Okay, okay, let's see how it works.
+So, first, just show me.
+John.
+Then I cannot create a box, so please, no, and just with my drawings.
+Pradeep.
+This is.
+Data.
+Ingestion.
+My plan, OK, so here.
+This step is first data ingestion will be happen.
+Data parsing will be there.
+Embeddings when we happen, OK, and the second between of this, I'm just...
+David Kim.
+Use it.
+Retrieval.
+Then...
+Vector base or vector store. OK, everything is safe.
+And.
+Said we have retrieval.
+Viber.
+So, here.
+That LLM.
+Nair.
+Okay, from this, it will give the output. Okay.
+Yes, it is.
+Yeah.
+UNext adding to the prompt.
+It will be good then. So this stage is known as augmentation.
+And this is not us.
+generation.
+Okay, yeah, this is the and here also.
+Yeah.
+Okay, so this is that architecture like that. Okay, how that retriever augmented generation, the rag will work. Okay, so retriever will be happen and generation will be happen there. So normally if we are having that LLM means that already it has been trained with no some kind of data.
+Okay, otherwise we can upload separately and they have to use that. So but we cannot upload that now our private data. So that's why usually we are saving our private data. Okay, like HR policy, financial policies under vectors too or vector base. Okay, storing our internal data that is known as knowledge base.
+Okay, we are storing that. And whenever we are calling that model, we have to specifically mention that you have to use this data also, okay, to perform this particular task. So at that time, the data will be captured from this vector database, okay, and it will get into the retrieval process.
+And at the same time, that user query also will be passed over here. Okay, so this is the very first step. No user query will be passed over to there in the retriever stage and vector from that vector base also it will capture the data.
+Okay, and before that, how the data will be stored? That is essential when we should know that. The data should be stored as no vectors. That is the embedding should be required. We have to use embedding models to convert our data into vectors, the numbers.
+Okay, so...
+So what happens is that there will be two important pipelines.
+Okay, that is 1S data ingestion. Otherwise we can say 3 pipelines, but only two pipelines. Data ingestion pipeline, there data will be ingested and data parsing will be happened.
+That is also an important step. Data parsing will be happen. So data parsing, that means no.
+Do you know about the data parsing?
+What is data parsing?
+OK, so in that ingestion pipeline, no data ingestion pipeline.
+The date?
+The data will be passed over there. So any kind of data, that means it can be any kind of format. It may be PDF, HTML, text, or Excel, or even SQL database format or unstructured format.
+Okay, so what we do initially, we take the data and we do data parsing. That is an important step. Data parsing means...
+How do you read the unstructured data or the structured data? OK, that is present inside there.
+How do you chunk the data? Chunk means just creating up no into the boards.
+How do you divide the specific data into chunks? Chunking is very important because you need to save the data inside some kind of vectors tool or vector base vector database.
+OK, vector DB in short way we are calling there is a vector DB.
+That is nothing, but it will actually help you to save vectors inside that. So once you do the chunking, after doing the chunking, you pass it to the embedding models. So embedding models also we have free models that are using hugging face models. Yesterday we have seen that using that also we can perform that embeddings.
+Or we can go with that API key kind of things, open API key, otherwise using the Gemini API key. Okay, using that also we can perform that embeddings. That embeddings, that embedding models will convert that value, the chunks, know here we the chunking will be happen. That means that sentences will be split up into a votes.
+Then that words will be the text will be converted into vectors here.
+Okay, that is embedding. For that, we require embedding models. Okay, so here we are going to look at about hugging phase only using that there's a free version. Otherwise, if you're mostly if you're using that no API key means the free version will not work, even though we can get that API key from that no free version, but it will not work. It will throw one error. If it is a paid version means it will work.
+Okay, so for learning purpose, you can go with hugging face models to perform the embedding techniques. So specific models will be there using that we can convert our text that words into a vector values. Then we can store it into vector D. So if you're talking about vector DB, different kind of vector database will be there.
+Later I will show that Chroma DB or.
+Base OK, so these two are most often used to one apart from that IVF also be there lot more is there later I will show that PPT OK.
+Okay, so...
+And the one thing is, Google also be there, Google generative embedding models also be there. Okay, using that also, we can convert our, this one, sorry, here, we can convert that embeddings, sorry, text into vectors. Okay, but it's better we can go with the tracking phase, but you should know what kind of models.
+No, embedding models will be there.
+Okay.
+Okay, so here I'm getting that no, I passed over the data, okay, my internal data, okay, it may be any kind of format, so data parsing is required, the chunking is required, then it should be converted into a vector format, then it will store it into a vector database.
+Okay.
+So I have created a knowledge base. In other words, we can say that.
+Knowledge base I have created here.
+That is external knowledge base or internal knowledge base, whatever knowledge base I have, and this knowledge base doesn't exit with the with the LLM. OK, that large language model.
+Okay, so...
+So this is this will be helpful to know optimize the output of a large language. So it references an authoritative knowledge base outside of the training data. Okay, now what will happen when user gives a query?
+Now, this query, instead of directly going to LLM, okay, it will go to a vector base. So vector base means not directly in between. I'm mentioning that process is retrieval. Okay, so usually that queries go to that vector database. So in this place, from that vector base, it captured the data or the internet data related to that user query.
+Okay, user query we are passing over now related to that what are the data is that it will retrieve from there adding to that user code.
+OK, so in this place, I am having user query and also from that vector database vectors.
+And query also should be converted into vectors.
+Okay, so that also we need to apply the 10 weddings and that same process we need to do.
+Why that is everything the text should be converted into vectors?
+Okay, so then, so based on that user query, it will do that search, okay, similarity search in that vector base or vector database, and it captures which are the data is relevant to that.
+Okay, then we are getting some context, no context or content we are having that some information from the vector data.
+For an example, if I'm asking that question, what is the leave policy of my company?
+So what will happen? It will, first of all, it will go to the vector store. It will gather all the related information that is available over there.
+Then that information is sending to the LLM that is called as a context.
+So now we are using that context along with this specific prompt. We are passing over these two into an LL.
+And it says that no, you can use this context to answer the question. Then finally, we'll get the out.
+Okay, so this pipeline is known as a retrieval pipeline.
+We are getting finally the generated out.
+Okay, so this is how that processes happen. So directly that user query will not go to the LLM in between one of the stage node that is retriever stages happening there. So retriever means it captured the data. Okay, based on that user query, it will do the similarity search and identify which are the data is relevant to that user query.
+For that, both should be converted into a vectors. OK, the similar cosine similarity technique, the mathematical calculation will be happening in the packet, then it will pass over the context, context along with the prompt.
+OK, that stage is known as augmentation. OK, some kind of context has been created, and that is augmentation. Then, if pass over this context with a prompt to the LLM, based on that, it will give the out.
+That is generated process, so that's why it is known as retriever augmented generation.
+Okay, this is how we can reduce the hallucination. But we cannot, you know, or we will not completely remove hallucination, but some amount of hallucination will be reduced if any queries that is asked related to the data. Otherwise, no, if I'm asking that what is the leave policy of my company, like that if you're asking that, when generic cancer will become there.
+because in that internet, no websites, it will capture the data and it will gaze that in a generic way.
+but it will be differ by company wise, organization wise. So if you want specific answer, you have to use your data. So for that, we are using that vector database. Okay, vector store. Then we can get the most relevant answer. Okay, not 100% accurate answer. Sometimes, sometimes we can get that, but we cannot give the test runs for that, but we can reduce that hallucination.
+Okay, so this is how that a drag will perform our rag works in the back end. So now the best example we can say that that is if you have user perplexity, okay, that is nothing but it is based on drag. It is completely developed based on drag application.
+In public city, you have no connector to various, you can connect at various retrievers.
+You can connect with the tools. Okay, you can connect with the web search. Okay, that is summarizing the output and giving by the LLM. So it also uses a different kind of LLMs itself.
+Good.
+OK, is that clear? Are there any questions on this about RAG application?
+If you have any doubts, please ask me because you should know that why LLM without drag and why the drag is required LLM with drag application.
+No doubts.
+Okay.
+And I got to tell about that, no vector DB, different kind of vector DBs are there. Here we are going to do that hands-on Chromo DB. That is a creation of that QA assistant, okay, with a rag and using that Chromo DB vector database and adding to that without PDF.
+Files, I will show that how to use that phase. OK, we can use that phase also to, you know, make to store the otherwise to.
+Create vector database, OK?
+OK, let me check that off, if it is.
+JB Inkal.
+S.
+Already, we discussed this one: hallucination, bias, fairness, and black box problem. OK, we cannot, the black box is nothing, but we cannot, no, that is an unexplainable model like that. We cannot with the internal architecture, the internal workings of LLMs.
+OK, how many parameters have been used, or how many weights have been used, or those kind of things we cannot view that. OK, that is known as close to modern types. Also, we have seen that, yeah, what is vector database?
+Already I mentioned this, no database designed to store and research high dimensional vectors, so it supports similarity based searches using metrics like cosine similarity and optimize for tasks like semantic search, image similarity and recommendation. OK, that is that a use case mentioned that, yes, now.
+He had mentioned a different kind of vector databases, traditional database and vector database, that comparison has been mentioned. So traditional one, we know that SQL, MySQL, or Postgre, MongoDB. Okay, so they're all traditional.
+Databases.
+Like the databases, Chroma DB, pine cone, I missed out that, a pine cone face, OK, and mail was V.B.
+Okay, these are all the vector databases and this is we know the traditional databases. And traditional databases are suitable for the structured data. We know that tables, rows, documents kind of things means we can go with the traditional database. If it is a non-structured, then we should go with the no vector DB, that is vector databases.
+Okay.
+That is text like that. It should be converted into one known vectors, text, image, audio vectors and query type. So query type in no that is we have to use no exact exact match filtering joins those kind of operations we can perform it that exact match means we have to write the select query.
+OK, select store, and also we can give the condition where that particular no ID is equal to this value kind of things, but here similarity search will be happened. OK, find similar meaning. OK, because the text values, no, so we have to use a similarity search nearest to neighbor kind of things we can use and indexing mechanism.
+That is the core difference between these two databases. So here mentioned BT has a inverted index. It is used for a first exact lookup. Okay. And here you can see that indexing mechanism is HNSW, IVF, PQ, and flat. Okay, these are all known as
+indexing. So these are all performed based on that nearest neighbor search. You know that the nearest neighbor algorithm like that, it uses the nearest neighbor so that similarity search based on this indexing technique is required, okay? When you are using that vector database, that indexing technique has to...
+Optimize the results, no? That is, we can get the more accurate results if you are using the indexing mechanism.
+And next to one.
+Search logic a use cases also mentioned that semantic search recommendation a memory and here are transactional systems and search logic that is a match based that where command we have to write here similarity based that is using this cosine similarity metric we can find out that one that matching values. OK.
+And.
+Data representation, text numbers, dates, OK, and can high dimensional vectors.
+Yeah.
+And the data will be represented that is nothing but an integration with the MLS is limited one and this is native integration with embeddings because of the integration of chat bots or recommendation engines or semantic search we should go with this. For banking systems or analytics then we can go with the traditional.
+Databases, OK, and performance high for structured query is high for vector search with AMN, OK, using the neural network concepts here, it will be performed that.
+And, and then sorry, not ANN, that is approximate nearest neighbor. OK, this is not artificial neural network, this is approximate nearest neighbor approach, and here, real-time membering support no carriers through API or models like no open AI hugging face using that we can.
+Create the embedding models. That means we can do the embedding part.
+Okay.
+The.
+How vector DB that is data is embedded into vectors? OK, then vectors are stored in the DB, then queries are embedded and compared using similarity metrics, then results ranked by similarity score. OK, that is similarity metric scores and similarity based on that, the scores will be there, then only it will capture the context.
+Yeah, indexing techniques in detail can know that is HNSW flat index, then IVF technique is there. So we should know when do we use what and what is that.
+Okay.
+So flat index that is brute force. That is another name like that, brute force that is accurate and slow.
+So each compose.
+This.
+Number, scorey with.
+Every vector.
+OK, OK, check all, then find the best match.
+So true.
+It checks all, then finally it finds the best match.
+And we should know when do we have to use this. So this is suitable for small data set. That is 10K to 50K vectors or that means we can go with small data set. Okay. And also if you need 100% accuracy, accurate result.
+Then we can go with this index technique, flat index, and also if we are going to do learning purpose also, we can go with the flat index. OK, large data segments you should not use this, it will become very slow. OK.
+OK, and next to one is Hatchan S.W. That is that meaning is...
+my pen hierarchical navigate. Sorry navigable small word. Okay, it is fast and scalable.
+So, it builds a graph.
+Yeah.
+Eight 2 bills.
+Graf of nearest neighbors.
+Okay, the node kind of things, graph means like neurons, the node will be there. Then the source will be have a node to node. Okay, so different nodes will be there. So node to node that node search will be happen there. HNSW. It is very fast. And when do we use if you need faster and higher accuracy, then you can go with that.
+Data is medium to large.
+Okay, so chat bots, if you want to create that with the data is medium to large size of that and faster, you know, resources required and high accuracy, then you can go with the HNSW.
+And next thing is IVF, that is inverted file index.
+Yeah.
+So, this is no works in based on the cluster. OK, so cluster the data.
+That means it creates groups.
+Then it will do the search on that clusters or a group.
+Based on that, it will take which groups are then similar.
+Okay, so in this case, no, that is when do we use a data set is large. That is a huge means obviously we have to go with it because it is not taking that separate or no word. It is creating a groups from that only it is performing that similarity search. Okay, and accuracy.
+Okay, that is a moderate level of accuracy we can get that.
+Okay, otherwise we can say that if you compare with the other two techniques, less accurate will be happened here. Okay.
+If you have millions of documents and you need to do that social means, we have to choose that IVF inverted file index technique. That is very fast. Okay, so mostly we are using HNSW. That is a fast one and also give that accurate results and medium to large kind of data will be acceptable on that.
+Okay.
+So in Chroma DB vector database, no, that Hutch NSW is internally is there. Okay, Chroma DB performed based on that Hutch NSW. Okay, that is automatic in Chroma DB.
+The.
+And then phase I think that is a IVF will be there.
+Or separately we can mention that. OK, I need a flat index in phase or I need IVF in phase. OK, so like that we can specifically mention that.
+
+Harshit Raj   46:15
+Ma'am, is IBF similar to IDF, like invoice document frequency?
+
+Nithyalakshmi Muthukaruppan [UNext]   46:16
+Mm.
+What IVF?
+
+Harshit Raj   46:24
+Similar to TFIDL.
+
+Nithyalakshmi Muthukaruppan [UNext]   46:25
+Similar to TFIT.
+No, TFIDF is term frequency, no document of frequency one that is here IVF is creating the clusters there that is TFIDF you are saying this one.
+TFIDF term frequency in Word document frequency. So they're completely different to one. Okay. So this is we are seeing that indexing technique that is comes under.
+Text representation.
+Anyways, no, we are using this to no convert it into numbers. That is a frequency based on that how many times that words comes two times or three times or one time, zero times. So based on that, no, it will convert that particular word into a vector. Okay, it works on actually it works on raw data.
+OK, text data here, we are using these kind of techniques on to your embeddings.
+OK, that is the difference that is used in vector DB.
+In that vector DB, we are having that embeddings, you know, that vectors inside, not text to value inside that, no vectors will be there, there it will do that, no using that cosine similarity, it will find out that similar values, that is user query embeddings and also your data embeddings, no, so there it will find out that which one, no having the.
+Less value, that means not less, that means highest to value. Similarity score is highest to based on that, it extract the context from the vector dig.
+OK, that is different one.
+Yes, so downloaded by that is given that.
+Which company is developed there and what about that? No multimodal support. Chroma DB is supporting only the text. OK.
+And multi-model is not supported here, and here, text and image pine cone, if you need that, no text and image is involved there means that embeddings known that vector DB, then we should go with the pine cone. OK, the same thing for V weight and and quadrant audio also has been added there.
+Most of them, we are using text means Chroma DB. That is the best one.
+OK, or sometimes we'll use that phase out, so that is a library, or it is for a C and Python one.
+Yeah.
+The other index types also mentioned that Chroma DB by default that is HNSW. Here we can specifically mention that one also, any kind of indexing you can mention. And here that is proprietary and HNSW in pine cone. Here these two, HNSW or IVF we can use.
+Okay.
+Everything is no comes under that ANN search approximate nearest to neighbor search kind of things.
+That's.
+I hope you understood about how a rag application works. So instead of that vector DB and indexing technique, you should know.
+So, now let's get into that hands-on part. So, please open that Google Collab. Yeah, prompt engineering yesterday, I haven't covered that. No, I ran it using that Zephyr no model. That Zephyr model is available in hugging phase.
+Okay to.
+I know, perform that from the engineering task, OK?
+to generate question and answer kind of things. Okay, please open that prompt engineering. If you are running, that means it will take time. Otherwise, you can, if you're running here, means you can have to open another notebook. Okay, just you look at that already. I ran it, but anyway, I am also getting that out of memory issue.
+Okay, I will show that. So about prompt engineering, already we discussed that very first today I mentioned that prompt is important to 1 to get the better result from the AA2. Okay, that is the GAGY mentioned that garbage input and garbage output kind of things. So how we are giving that prompts based on that only we can get the relevant information.
+For that also I mentioned that the framework, CSIFBA framework. So if you are using or if you are giving clearer instructions to the AA tool, then only it will give the relevant information. Okay.
+So, here.
+and using that local LLM model that is open source model from the hugging face. Okay, that is the affair model. So first I install the required libraries or packages, transformers and accelerate. Transformer, we know that load LLM models and accelerate helps run.
+models efficiently that is either in GPU or CPU. For that, accelerator is required. Okay.
+And then from transformers import auto tokenizer, that is auto tokenizer, convert text to tokens. If you want, I will write it down.
+Open yourself.
+Okay.
+But outer tokenizer converts text to.
+Okay, convert text to tokens. Okay, for that we have to load auto tokenizer, then auto model for casual LM. Yesterday I have shown that sequence to sequence LM model, okay, for that sentiment analysis task. So here we are loading the large language model for text generation.
+OK, so for that, uh, I'm using that Caswell Ella.
+Okay, it helps to predict the next two word based on the previous words. The earlier one, yesterday we have done that classification task. So I have used a sequence to sequence model. Here I'm using Caswell ML model. Okay. And next one is pipeline model. That is, no, it helps to run that model easily.
+And the torch, I'm importing the torch. There is a PyTouch. It runs the neural networks. OK, and model name, you have to mention that this is a model from Hacking Face, Zafed 7B. Seven represents 7 billion parameters. OK, it is good for, you know, chat kind of things. So, it is an open source especially.
+Then I load the tokenizer, the tokenizer, before that I have to use it auto tokenizer dot from underscore pre-trained. OK, and instead model name we have to get that, what will what is happening here, no? It downloads the tokenizer and it proposes the text in to convert the text into tokens.
+Okay, and next to one, I'm using that model casual LM auto model for casual LM from underscore pre-trained. I have to apply that and model name and device underscore map equal to auto parameter I have used. So model name is which model to load. It's mentioned that revise underscore map is.
+Automatically it will choose the GPU if it is available, otherwise it will run it on CPU. That is the meaning of auto one. Okay. And touch type, as I mentioned, that a float. Okay. So 7P parameters are there, so it requires a good RAM or GPU. Okay. It's a little moderate kind of level, moderate level of model.
+So, next thing is, I'm using that pipeline, so it creates a no ready to use generator. OK, task type I mentioned, text generation and model name, tokenizer, and device underscore map is equal to auto. This is not required to mention already we have created, but anyway, OK.
+Then, if you run this...
+All these no packages will be imported and pipeline has been created. And when we talk about prompt, there's a prompting, no prompt engineering or prompting. You have seen that zero shot, one shot, few shot. So 0 shot means there is no examples in your prompt, okay? You directly ask the models without giving any examples.
+So like this, the prompt, I'm taking as what are the common symptoms of diabetes. Okay. And the response is equal to already I created that pipeline now. So I'm using that pipe function and instead I'm passing over the prompt. Okay, that question. Then what is that maximum underscore new underscore tokens argument?
+And do underscore sample already we have seen that reduce the randomness. OK, and what about max underscore new underscore tokens?
+Yes.
+Any idea on that?
+From the name itself.
+
+Harshit Raj   56:30
+Ma'am, it is the maximum number of tokens.
+
+Nithyalakshmi Muthukaruppan [UNext]   56:34
+That is how many tokens the model is.
+
+Harshit Raj   56:35
+To be generated.
+To be generated.
+
+Nithyalakshmi Muthukaruppan [UNext]   56:40
+Yes, absolutely. Then how many tokens we are not telling that how many tokens the model is allowed to generate as output. OK.
+Yeah.
+So here I'm taking that 100 means model can generate up to 100 tokens, then it stops automatically. That is your choice, Vinay.
+
+Harshit Raj   56:55
+Ma'am, input is included.
+
+Nithyalakshmi Muthukaruppan [UNext]   56:58
+Sorry?
+
+Harshit Raj   56:59
+My input is included.
+
+Nithyalakshmi Muthukaruppan [UNext]   57:02
+No, no output output only the generators and generator parts process. OK.
+Okay.
+So, input is same one. OK, how many in that not limited one and output is limited by the maximum new tokens. OK, the argument or a parameter.
+Okay, and next thing is I am printing out that response of 0. Why I have chosen that is response of 0.
+And what is the generator text?
+Response, we know that this is a response, no object, and why I'm choosing that is from that no zero.
+No idea. Okay, so that response, no, that the pipe function, it returns the list, not a single no, one value. It will return the list of outputs. Okay, from that, I'm going to get the first item. Okay, give me the first item in the list. Okay, that's why I have selected that.
+And what is generated text?
+Generated text to extract the actual text output from the model.
+OK, so if I print out that, it will return the answer like that.
+Diabetes is a chronic condition that affects. Okay, it's a list of values will come over there. From that, I'm extracting only one that is a first item.
+It.
+For that, I have selected response of sale.
+You also just run and check. It will be run, but it will take some time, OK?
+So without any example, I'm asking that question to the my model. OK.
+And you can change the response of 1, two kind of things and check whether that outputs are changed or not kind of that. Okay. Now, next thing is one shot I haven't added that few shot prompting, then chain of thought. Okay, few shot prompting means some examples. Okay, more than an example if you are providing that, adding to that prompt.
+Then let's see how that response will come. Okay, so few short prompts and an object name I'm giving there and examples I'm giving like that question and answer, what is the capital of France and what is the capital of Germany? Then I'm asking that Corey, what is the capital of Italy? Okay, then my model should return the output. We just should look at that examples.
+and it should give the output. So here also the same, no, already I created that pipeline. So I'm using that pipe function to mention that the prompt and the maximum tokens is here I mentioned only three. Then do sample the same thing, you need to run that. Then based on that examples, it returns the output of the your queries or new costic.
+OK, so this will be, you know, if you are giving some examples, OK, adding to the query, then most probably we will get the better resource.
+OK, that's why we are suggesting to, you know, add some kind of examples when you are asking or when you're writing a prompt.
+The next one is chain of thought, that is COT prompting. Here we are just instructing the steps. Okay, so guiding the model to reason step by step before giving an answer. So for that also I have to give that question as this one and answer is this, no, on the step one, the student studies 3 hours on Monday, step.
+Two step 3, it should capture the data, then step 4, it should add all the because I need to calculate how many total loss, so it should add the total loss, then it should return the answer. OK, so examples I have given then how it should perform there, so like that for next question and it should give the answer. The steps also I mentioned that, but here actually no, I ran and it showing that out of memory error.
+Otherwise, it will return the answer. Okay, final answer, we can get that. So later you just run and check that. So this is COT, okay, chain of thought. The step by step process requirements, you have to clearly give that instruction. You have to add some kind of example to showcase this is how I need, okay, I need the response. So this is how you have to perform.
+We need to give that instruction clearly.
+So, it's not written there, OK?
+OK, later you just run and check that output. This is about a prompt engineering. OK, with that open source, we can use that hugging face models to perform this kind of task. Now, let's...
+The.
+Play.
+You please run and check that a prompt to engineering, then we will move on to rag.
+That is a case study, building a Q&A system.
+So we have seen without rag, no, that's LLM without rag, then LLM with rag. Okay, we are going to run that model, run that task or run that application.
+And one more that is not available.
+That is a Langchain framework. OK, after this, no, that is also required, but in that, no, even it is, it's not added, so I just added the concept of Langchain framework, the library. It is used to build AI pipelines easily. OK.
+So it helps to that Lang chain, or it helps to connect the LLMs, connect the vector databases, and the prompt templates, and it makes it workflows automation. And we can add memory on that. Instead of writing everything manually, like in a RAG application, we need to write it to manually.
+I'm going to show that embeddings, search, okay, then that format and LNM, all those things, we have to do it in a manually to avoid that, not avoid to reduce, okay, the manual work, we can go with that Langchain framework, that a template, ready-made template kind of things, so we can use that Langchain framework, Konanur, when you are using that RAG application, it reduces the time.
+OK, to perform that manual work.
+OK, so Lang Chain is used to do implement a rag application and why? Because it handles the retriever LLM and also the prompt templates. OK.
+That is the use case of that Lang chain. You should know about that Lang chain framework. Like that many kind of frameworks will be there, that basic one as a Lang chain framework.
+Okay, if you want the faster development, you know, you don't want boilerplate code, then at the time, no, we can go with the LangChain framework. There is a rag is telling that what you build and the LangChain is, I don't know, nothing but how you build it. Okay, that framework.
+We are saying lag is a manual version, and this is a Langchain is a framework kind of things already that pipelines has been built, so you just use that framework and you can implement your work, no, I can add your data, you can implement your.
+Task on that.
+So, simply, we can say the Lang Chain helps implement RAG EC. OK, so like that Lang graph will be there.
+And still at once, so some kind of frameworks are added. OK, semantic framework, all those things will be.
+Okay.
+So please everyone run that prompt engineering and check whether you are getting that output or not.
+So, that is just no. Now, we are not going to do separately that prompt engineering task, but you should know how that prompt, you know, should be in, and how can we get that in an effective manner, because whenever you are getting a tools, a prompt is in one of the no essential one. OK, you should take on, you should you know give more concentration on that prompt also, why? Because if you are giving clear instruction, then only one no a tool or...
+Your model will do the prediction, or will generate the new content in a proper way.
+The.
+And it is 7:43, just to know, I think after a break we can do this.
+Okay.
+Yeah, I have used Chroma DB phase for small documents list value. OK, or using phase and Chroma DB, then especially using that PDF files. I have shared that PDF files using that Chroma DB vector database I have used, and that is developing that no Q&A system.
+question answering system, that one. So in your assessment, you had to build the same thing, QA system on the PDF files, but you need to use face. OK, different kind of index, you can use it and perform that. OK.
+The 3 tasks will be the three different techniques we are using there, all the three different tasks we are going to perform here. OK, now you just go for a break. OK, then we will do this hands-on part.
+Okay, shall we continue?
+Give confirmation.
+OK.
+OK, so here we are going to build a Q&A that is question answering system. OK, by using that PDF files. OK, on PDF files as considered as a knowledge base, OK, internal documents kind of things. So, using that, you know, my model will do that, you know, prediction of that or answering the questions.
+So here I'm going to apply rag application along with that vector DB, Chroma DB and face. Yeah, but not on PDF, PDF files. I'm going to use that Chroma DB, the vector database. So very first step I have to know. So what are the things we are going to do? Load.
+And...
+S.
+Yeah.
+So, very first job we have to load the documents.
+A PDF file, then the second stage is convert them into.
+In weddings.
+Then store embeddings.
+Enough.
+Vector database.
+Then, query and that user query and retrieve relevant chunks will be there.
+OK, that process retrieval process will be happen, then pass over this to your LLM and it will generate the answer.
+OK, this is the entire process.
+So the load document as PDF, otherwise very first step we are going to use the list of text. Okay.
+Okay.
+So very first step, you just install that required library. Okay, that is install face CPU sentence transfer because I'm going to showcase that face also. So import face CPU sentence transformers, transformers. Sentence transformers is used to
+Do that, you know, embeddics that embedding model that is comes from the hugging face. OK, face, we know that that is a Facebook library that is used for used for faster similarity search. OK, and yeah.
+I think I just erased this.
+Then load that face library, NumPy for numerical operations, then sentence transformer that is to perform that embeddings. OK, convert the text to vector format and import pipeline. OK, we required that a pipeline to perform that, you know, that flow.
+So first one, I'm taking a small document. OK, the list of sentences has been created here. Then second step, create embeddings.
+Okay, so create embeddings. I already mentioned sentence transformers. Okay, that model helps to create vectors or converting the text to convert. So for that, we have to use sentence transformer function. Inside, we need to use that model name. That is all mini LM. Okay.
+Smaller, you know, lightweight or smaller large language models, so all mini LM L6V2 model it is available in the hugging phase. You can now copy and paste in the hugging phase. You can identify that one. OK, I'm loading that pre-trained embedding model. It converts the sentences into vector format, OK, numerical format.
+And then?
+I'm using that name of the object and the encode method or a function. And inside I'm passing over that document, DOCS, and the convert to numpy is equal to true.
+So, what is that convert NumPy? That is a convert to NumPy argument. Here, actually, I'm converting no, that is encode represents it to converting each sentence, otherwise each sentence becomes that a vector. OK, and what is that convert?
+Under school.
+To underscore numpy equal to true that argument why that is required.
+Any idea?
+Convert to NumPy.
+That means it tells the model enhances.
+OK, it tells the model to return the embeddings as a NumPy arrays instead of PyTorch tensors. So what's the difference between tensor and the array object?
+As I mentioned that I meant giving that argument convert to NumPy as true, because why? Because it will return only the Pytouch tensors, so I'm converting or I'm telling that give it as a give it as an array object. OK, so we should know what is the difference between tensor object and the NumPy array object.
+8.
+As A PyTorch tensor object, no?
+Any guess what distances?
+We know that NumPy array, you have learned that NumPy array, how that array objects know looks there.
+What is a tensor?
+Tensor is also known as that multi-dimensional array object, multi-dimensional array that is used in deep learning, deep learning models.
+Then, what is the difference?
+That is used in touch, that is tensors, used in deep learning models. And NumPy arrays is no especially for that. That is also a multi-dimensional array object. It is for numerical computation.
+That is, it runs on CPU only.
+Okay, but in the torch, you know, the tensors that is supports GP.
+It is used in neural networks. That is the difference.
+Okay.
+OK, so I'm just converting that into NumPy array. OK, usually we are getting that as a tensor. Tensors is supporting the GPU, but NumPy are not supporting GPU, so I'm just converting tensor into NumPy. OK.
+Why? Because especially that NumPy is for processing and storage process. OK, tensors not touch from the touch. If you're getting the tensor object, that is for training the models.
+Okay, next to one, I'm building that phase index.
+Yeah.
+So, third step is phase index.
+So, here...
+I'm using that embedding dimension.
+Then I'm using that indexes flat index. OK, so from that face I'm choosing index flat L2.
+OK, so this is, I know, without LangChain, there is a no, if you're not using LangChain manually, we have to define all these things in a rag application. There is a main difference with that, no LangChain framework that without LangChain one.
+So this is we can say that manual drag without line change.
+Okay.
+So this is, I already mentioned that converted number is required for that storage purpose or a face index. That's a face that directed DB. Okay.
+No.
+This embeddings dot shape of 1, OK, it gets the vector size, the dimension.
+Then I am using that index, that's a flat index, index flat L2. It creates the phase index that is L2 distance kind of the Euclidean distance based on that no Euclidean distance metric will be used. Okay, to do that semantic search.
+Then I'm adding this index to my embeddics.
+OK, this is my embeddings, you know, on the documents I'm converting that, so now I'm adding that index to that embeddings.
+next to 1 user query. So my query is how do I reset product?
+Then I'm converting again, the embedding is required. No, I'm converting that no encoding process is happening, converting my query into a vector or a number.
+Okay.
+And what about this D and I? Here I mentioned retrieve top two documents. OK, it finds the top two most similar documents. Why? Because I'm choosing K is equal to two.
+And D represents distances, I represents indices.
+Okay, so on that index, I'm applying that search method and the Q underscore EMBS man my query, that is a query embeddics.
+On that, I'm applying that to search.
+And data documents, new object, I'm creating that. So that is a list comprehension output should be a list format.
+So, here it takes that to know indices from phase.
+And gets the actual text.
+Okay.
+So, therefore, that I am using the docs of.
+I and for I in I of 0 that is indices I represents the indices.
+OK, so my document, I have added that list of strings, a list of sentences. No, that is my documents. So, docs of I represents get the element at indexing from the list. OK, so I in I of 0, so docs of 0 means the first.
+sentence will become over the docs are one mean second sentence like that.
+So, indices will take only, I'm taking that no K is equal to two, then my indices will take only two values, zero and two.
+Okay.
+That is doc of 0 or doc of doc one of no that two will come.
+OK, and...
+Next to one, augmented prompt. So here, that context will be created from the retrieved document. So I hope you understood that. This is my data, no. That embeddings will be added there. That means the data will be converted into a no vector.
+the numeric one as well as that user query will be converted. Then I'm going to create a context. Okay, so context comes from the retrieval documents. So retrieval documents also here I created from the user query and my data. It is available in my vector DB.
+Okay.
+So, phase, you know that no compares your query with all the document, all document embeddings, and finally it will returns the top K that is case two. I mentioned that's a more similar documents, only two documents will become over there.
+OK, so suppose if you are, if it is no compute the similarities between the query and the document zero.
+That is user query and everything converted into vector, no document to 0, 0 to one that is where first to one, so very similar.
+Then it will check all the query with the document one that is not related. OK, just you assume that, then query and document two moderately. OK, it is showing some kind of my no value for similarity value. OK,.7 some kind of things then.
+Now, we are saying moderate it is related or no similarities, then from that a phase will pick up these two.
+The 2 matches only I mentioned that. Okay, very less data and only three sentences of that. So zero is the best to match and two is the second best to match kind of things.
+Okay, based on that scores, the score will be captured in this distance.
+OK, like the some values will be kept.
+Then.
+You compute the vector similarity.
+Yeah.
+And then I joined that no retrieval documents.
+As a string objects we require, this is a list of list objects. I'm just making as a string format. For that we have to use join method. Then I'm adding that adding context and the prompt we have to pass over to the LLM model. So this is my prompt. You are a helpful assistant. Use the following product manual information to answer.
+So that is a context. OK, manual information is a context is stored there and the question comes under that query. So everything we have to specifically mention within the curly brackets. OK, that object context and to query and answer that model should provide that. Now I'm loading that open source LLM model. Yesterday also I have shown that to plan T5 model that is T5 model is suitable for that question answer generation one.
+Okay, so instead of the pipeline, we have to mention that task name and model name. Okay, instead of the model architect.
+Then we can generate the response that answer by using generator, you know, that object we have created. Instead, you need to pass over the prompt and the maximum tokens and zero, why zero is required here.
+Why did I select 0 here?
+This is a generated step, no, the final step. I'm passing over my context, no, adding to that prompt. Okay, this is generated text, no, generated text that I have created there.
+And why that zero?
+The.
+Zero represents getting the first result, no?
+OK, the simple one: 0 represents getting the first result. OK, and generated text to be know that is it only the actual answer text.
+Okay, then print out that user question, retrieved context is optional one, and the final answer is stored in that response. So I'm printing out that response. Okay, once you run that, it will take time to download all the packages which is available and that models, even though the embeddings and that LLM models.
+Then finally, it is giving that question, it print out that question, how do I reset product A? And this is the retrieved context. And from that, it generates the answer.
+And it's showing that press the button for five, and you just run and check that whether it gives that answer from there.
+So, again, I just run it.
+It will take time, so please run and check.
+Okay.
+That is the answer, I think, how to reset, no?
+The question is, how do I reset a product to you?
+Five minutes, so that is the right answer, right? OK.
+See you also, please run and check. OK, from the given document, it is captured the notes, yeah, by pressing the button for five seconds. That is my answer.
+Okay, so you should know to choose the models. Question answer generation means generation kind of task means it's better to go with the T5 model, but small model you can choose instead of choosing the large or moderate one. You can go with the small model, but again, it depends on your data. Okay, even though the moderate data means you can go with the small also.
+But large data means it's better to go with a large. OK, but it will take time to execute that code.
+Okay, next to one, Chroma DB. The same thing, we can use it, you know, with the help of Chroma DB to perform the task. Chroma DB is full vector database, but this is a phase as a library for similarity source, you know, as it is not a full vector database.
+OK, so especially we are using that PromoDB for stores, embeddings, documents, metadata, OK, for that, and phase is already mentioned is fast and efficient one. OK, moderators, small to moderate kind of data, we can use phase.
+No, as a vector database.
+Yeah, all these things I mentioned there, and now...
+Yeah, Chroma DB, the same thing, I think so, the same documents, you know, I have used. So for that, you need to install that Chroma DB sentence transformers. Okay, that phase I have used and here you need to use Chroma DB, then import that, the same process you need to do. But here we are installizing the.
+Client. OK, there is a difference from there and here, no phase and Chroma DB. OK.
+Then we have to create a collections.
+And this is the documents. So why these two are required? Why do we need to initialize the Chroma DB client? And why do we need to create a collection?
+And those questions usually comes then, no?
+Yes.
+So collection is simple way we can say that there's a place to store the vector. OK, that is known as a.
+collection, okay, collection object. So for that I need client.
+OK, that is a Chroma DB client.
+The.
+And otherwise we can say there is a main entry point to interact with the database. So for that client is required.
+OK, connection to Chroma DB database.
+And collection, that is a no table kind of things we can say that, OK, so I'm just giving that name as product to manuals, then documents are there, it will be stored under the name product to manuals, OK.
+And next embeddings, the same thing you have to perform there, convert that, no, your documents into a vector format, then queries also you have to apply that in code technique in code method to convert text into vector format.
+Then, from that collections, you know.
+The collection and query we need to retry the documents context is required. So for that we need to run this command collection.query and inside you have to pass over that queries embeddings is equal to Q underscore EMB. There is an argument and this is the query embeddings. And what is that N underscore results equal to?
+Okay.
+This is, we know that I'm extracting that first research or first observation kind of things, first value or first element kind of that, and in this collections dot collection dot query, OK.
+What does that represent? North underscore result.
+So after searching that results, know that what are the things will be there, know that content will be stored in that results.
+Okay, it will do the search in database and give the results.
+So this collection dot query takes you by query embedding, searches the database and returns top to most similar. You can change and check no issues. OK, less data only. That's why I have chosen the two one.
+Okay, next augmented test stuff, the same thing, you have to write that prompt question and answer. Then here I am using the same model, I think, a plan T5 base model, text to text generation model. It tokens, I'm choosing that 100, you can change and check that. Then it will get the same answer only. Press the button for five seconds.
+It's the same question I have passed over. Not much more difference will become over there, okay? But when you are going to do, you know, fast run, when you need fast execution and also accuracy as well as the data set, if it is a moderate level of data set, then we can large also, okay? Then we can go with the phase. Otherwise, you can go with the Chroma DB. If it is a small means, you can go with the Chroma DB. Otherwise, the Chroma DB director database, it is not.
+advisable or suggested one. Okay. Okay, now let's get into that actual case study that we have to use two PDF documents. I think PDF documents is mentioned there. Okay. PDF files we are going to load here for that we required a PI PDF to file.
+Sorry, module. So install that, pip install PI PDF to that is in collab. We need to install it every time. Okay. And also that sentence already I installed, so I'm not going to install this one.
+In.
+Then.
+Yeah, other things, import OS required and import PDF reader is required to read the PDF files from PI PDF to module. Then Chroma DB, embedding models, pipeline. Then I'm reading that PDF files, okay, sorry, I'm storing that PDF file as a list kind of things, agenting framework and tech guide agents file, okay, name it as PDF files. Then extract, extract.
+chunk, okay. So I'm using no manually I'm doing this operation, I'm creating a chance. There is a data parsing technique, okay, from that PDF files I need to perform these kind of things. Otherwise directly no we can update the embeddings. But here I'm using the PDF reader function to read, you know, every pages.
+and extract that text. Okay. And if that page is exited, then you have to add that text. Okay. Then I have to make it as known that a regular expression I have used as a strip function or a string function, we can call it over that. Then apply that strip function to clean up the data and make it as a chunks.
+No split-up process will be performed there, then store all the chunks will be to the all chunks that are empty list.
+Okay.
+Then this is optional one, length of chunks if you want to see there means you can use this one. Okay.
+Okay, sometimes the pages are empty. That's why we are adding the condition. If pages exist, then you can do that process and add that page and then you can do that process kind of things. Okay, and that is a required one. Otherwise it will throw one error. Okay.
+OK, the next one embedding model, I'm applying that the same model sentence transformer, hugging face model, all many LM model I have used. Then client collection, how we did it on that earlier case, the same process we need to do that, a different name you have to give, otherwise it will throw an error. Already it is available kind of things, OK, whenever you are running that.
+You have to give a different name, otherwise you need to delete that one. OK.
+Yeah, next to one, that collection, I'm adding all the documents, all chunks and embeddings, everything. Then that query and we need to make it as no vector format, then results or context you have to get that, that is a return underscore documents. Okay. And prompt question, answer, everything you have to mention. All the things.
+steps are similar only. One thing is you should know how to read that PDF file and how to create chunks from that. Okay, each page from that we have to get these chunks. Then apply that embedding notice on it. Okay, that is those steps you have to add it separately. Okay, yeah, if you run that, it will give that results. You please run and check.
+That is important. Please run and check based on my query. What is that query I have added here? You are helpful as to choose the following context. Sorry, there is a prompt. What are the key differences between a chat bots and the AA agents? That is my query. So using those given uploaded document or added the documents, so based on that.
+It should give the results agents operate on a dynamic kind of things, not something it is returning that, but I I have given the limited one. OK, that is maximum tokens I have given. It is showing that all the things are available in that PDF document from that that not PDF document from the retrieved context.
+Okay, that is similar context, you know, has been selected comparing that user query and the document, it's collected the context and from that it listed out that no top two only I got mentioned there are no tokens based on the tokens also it gives the results. If we increase that means it will be increased.
+So you please tune that. That means you please change that values. Wherever you can change that values, it can change it. Okay, then you check that one. Okay, this is I'm choosing that only three, top three. From that one, it returns the results. You can change that number of results, maybe the 10 or 15 kind of things, then you can get the.
+more retrieved context from that, you can increase the tokens, means you can get maybe one paragraph kind of things, more than five lines of sentence will be that output, right?
+Okay.
+So, this is how we can create this, you know, um, QA system.
+OK, that application we can create again the same thing.
+This code is not the same thing one. OK, but a different document or not on like traditional questions changed.
+Same questions.
+Different results are coming there.
+Yeah, next time if you're running that it's giving the different result kind of.
+Okay, every time it's not written the same answers. Okay, so everyone please run and get understanding on that. The codes are very simple one. It depends on the data, it will be different. Okay, so most of we are using the PDF files. So PI PDF module is required and the PDF reader function is required to read the pages from the PDF files and you need to create a chance for that we need to run.
+Try to manually the looping structure, and so on.
+Okay, and other things that creation of no, if you understand that a rag implementation, how does that rag application is working? Then easily you can write the steps in your code. Okay, so you have to convert your documents into a vector format that embeddings is required.
+And user query should be converted into vector. There also embeddings is required, encode method is required there. Then from combining that, you should get the retrieval context. Okay, for that, we need to use, I don't know, the retrieval documents. You need to create that object, retrieval documents.
+And that also you can clearly mention that how many results it should come back that, okay, the top kind of things. And after that, once you return that, you have to pass over to the LLM. You just initiate that model, LLM model, what kind of model is suitable for the text generation or classification kind of things or mission translation.
+Okay, machine translation means encoder decoder model that is a bot model will be suitable one. At the time you have to choose a bot model.
+Okay, and other things, yeah, once you initialize that model, then you can pass over that context, know that it will documents to your model and generate, know before that you have to specifically mention that prompt context question. Okay, prompt is essential one, you should clearly give that prompt.
+get that instruction and also you have to add that context question and it should generate the answer.
+Okay.
+Yeah, any questions on that?
+Please run and check and get understanding about each parameter or arguments. Okay, what are the arguments we are using that you should know about that. And yesterday also we have seen that what is the temperature, what is top underscore B, the probability, top underscore K, why it is required. Okay, it reduces the randomness. So each parameter you should know about that.
+Yes.
+So, if you have any questions, you please ask and clarify that.
+This is the final stage of your entire program. No, we started from very basic concepts of no Excel.
+So using Excel, you have learned how to do a data cleaning, data manipulation. The next thing is SQL, using SQL also you have learned how to perform that no cleaning and manipulation by using SQL queries. So the database you have learned about that, that's a traditional database. Then you moved on to Python. So that also you have learned how to do data analysis, data cleaning, data manipulation using the database.
+different to Python tool. How can you write a program in a structured way, those kind of things.
+Then you move on to machine learning, data science that are machine learning. How can we build the model once we clean the data? How can we use that machine learning model to build the data, sorry, build the models and get the predictions? After that, you move on to deep learning model, little advanced one, that is neural network concepts you have learned.
+And also you, you know how the comparison of machine learning, deep learning, when do we go with the machine learning, when do we go with the deep learning models kind of that. But they are limited only you have learned that is ANN. Apart from that, you should explore about RNN, CNN, LSTM models. Okay, that is a required one.
+And then you move on to the advanced to no level of that, the generative AI. Nowadays, everywhere, everyone is using that one AI tools. And so here you have learned that LLM, large language models, adding to that prompt engineering, that is a prompt. Okay, how to give that prompts and how that LLM works, that large language models performs, what kind of architecture is in behind
+Of that AI tools like ChatGPT or, you know, Copilot kind of things. OK, most of the models, not every model, most of the large language models has have a transformer architecture. Some models have that autoencoder architecture, some have VAE architecture kind of that. OK, but most of the models are having the transformer architecture.
+So you have learned how the transformers works in the back end. What are the techniques or what are the functionalities are required on that? Adding to that, you know you know how to implement that, how to use large language models to perform the same kind of task know, sentiment classification. We can use it, we can use machine learning model also.
+But the difference is here we can use large data sets. We can also we can get the immediate results.
+Okay, and yeah, text generation part also, we can generate a new content using machine learning deep learning. We cannot generate a new content, but here we can generate a new content. That is also the difference between machine learning, deep learning, and generated large language models. Okay.
+Yeah, up to this, you have launched the drag application also. So a lot more advanced concepts also be there. So you can later explore about LangChain, LangGraph, A agents, how can we create agents? These are the foundations for that A agents. Okay.
+OK, yeah, any doubts, any questions?
+Please feel free to ask.
+in chat.
+Is everything is clear?
+Please give confirmation, or if you have any questions or any doubts regarding that machine learning, deep learning, or generic concepts, you please ask now.
+Yeah, Aishman gave the response. Thank you.
+Not about others. So this is the last day hereafter. No, we will not connect and we will not ask any questions to you. So please feel free to ask or give your answers. Give response.
+Hey.
+Like A to immediate response kind of that.
+Yes, now I am getting more responses. Okay, good.
+Okay, because that is the essential one, no? Simply, you are not spending your time every day. That is, today is the 50th day, so every day you have spent two and half hours, minimum two hours, no, for fear continuously we have spent there. So, outcome no should be a meaningful one, something or not something kind of things. You should
+No, no about generative AI application. OK, that is the final outcome. Adding to that, that machine learning depend not nothing, but that is a foundation of GNA, that large language model. So final outcome, you should be able to create application, OK, using large language models like you and the system we have created like that we can create chat bots.
+Okay, that is the final outcomes. That's why I'm saying that if you have any questions, okay, even it is a simple question, you can clarify that. Why we are using and where we can use, what is that? Those kind of questions you can ask, okay?
+Otherwise, if it is clear, means that is good. And don't stop up to this. You have to know.
+Yeah, you have to learn it, okay, how to explore it. Don't stop up to rag application. After that, I'm telling that that the flow will be no like land chain, land graph, semantic framework, and after that, you can go with that AI agent, simple AI agents, try to create, okay, everything nodes comes under the large language models only. Some more advanced functionalities will be added.
+Then, no multi-agents kind of things, you can explore it continuously, you just explore that, it just, you have to learn it. OK, OK, so I think we can stop up to this, so...
+And I finished the Gene one, and I would like to tell about that case study that is your, yeah, the same thing, Q&A system, but using a phase, you have to build that. OK, I just show you.
+Shan.
+Yeah, two PDF files I have shared that machine learning and NLP file. So you need to create a Q&A system one only. Okay, answer generation part using face, not Chroma DB. Okay, you have to use it to face and you can use hugging face transformers. APA is not visible if you have you.
+Want to try that means once you complete this, you can use that. Okay, open AI. If you have a paid version, then you can go with that. Okay. And as in, clearly I mentioned that what kind of models you need to use there and what kind of tech DB you need to use. Apart from that, if you want to try with the Chroma DB or Pinecone, you can try.
+Okay, so this is not limited one. You should use this kind of techniques. And adding to that, you can try with other techniques and you can compare your results. Okay, that is, you know, actually we are expecting like that. It's not limited kind of things. You have to explore A lot.
+Oh.
+Okay, steps also I mentioned that. So top also your choice, you can choose K value. Okay, that is not fixed one. You can choose it and once you complete that, you got to submit it now, you need to upload it in the loop. Okay.
+OK.
+And if you want, I will share with you one more file that is rag, let me, because we have a time, two to three minutes, so not much more time I will take, let's see. Rag.
+Yeah, anyway, I will in that post session file, I will share this document along with the data set of patient records, no, 50,000 records be there. Okay, this is a huge data set. So here, actually, no.
+Or the task I didn't mention that, OK?
+Yeah, here I'm selecting this.
+Combined, what is that combined one?
+The analysis combined variable.
+Is that?
+Okay, combined I create medical conditions, current medication, problem description and doctor notes. Okay, using that, I know I just combine all the things using that actually I have.
+I forgot to mention. OK, I will add that problem statement, then I will share it with the one. OK, so you can also use to phase library.
+And...
+Yeah.
+Generation only, Q&A generation only, using that, you know, that healthcare domain, using that problem description, and what are the medication they are taking, that all those details using that, you can now generate that Q&A system.
+Okay.
+So, here, step by step, I have mentioned that.
+And also I will remove that Grok API key. Now it is not working anyway. But anyway, I will remove that. I mentioned that no Grok API key is that open source one, the free version itself, it will work. So instead of using OpenAI or Gemini API key, you can go with the Grok API key.
+Okay, instead of sent and transformers models kind of things, I can use Groc API key and also here I have used LangChain, the template also. It just, once you complete that LangChain concepts, then you can try with this. Okay, I will share with you all. This is not in your, you know, that contents in the syllabus, that's why I didn't cover that.
+Um, but later this is required. One lang chain is required. It reduces that manual work in that rag application. OK.
+I will add problem statement and I will remove that grok API key. And also main thing, whenever you are sharing your notebook, no, if you have run with your API key, whenever you are sharing with others, you please remove that API key and share it to others.
+Okay.
+Okay, yeah.
+Is my screen visible?
+Am I sharing my screen or what?
+
+sudarshan kumar   2:08:18
+No, ma'am, it's not over.
+
+Nithyalakshmi Muthukaruppan [UNext]   2:08:19
+Oh, that's right. I didn't notice that one. Without that, I'm just showing this. Okay. So can I just show this? This is the data I mentioned that our healthcare data set. Okay. These are the columns. I combined that and create a new data based on that.
+No, I created that question answer generation system. OK, so finally, if I ask any questions related to that, it returns the output, and here I'm using that lang chain, adding to that Grok API key. I mentioned that, no, anyway, I will remove this API key and I will share it to you, OK?
+And meta llama model I have uses the moderator model, not a small model one. And using that, if you run that node, that query, if you run that means it will give the response or answers. Okay, here API key has been used.
+Okay, in this file only I mentioned that I will add a problem statement and I will share it to you later. Once you learn that launching, then you can run and check. Okay.
+Okay, so we finished.
+I hope everything we covered. I hope that too. So for all days content to be covered, as well as I hope you all got some understanding or you got some kind of knowledge, especially in that machine learning deep learning engineering.
+S.
+Okay, we stop up to this and thank you, thank you for your great support for continuously, you know, that 50 days and late evening sessions especially. Thank you, thank you.
+Yeah, Ravi.
+
+Ravi Kumara [UNext]   2:10:13
+Thank you, ma'am. Thank you, Nikam. Thank you so much.
+Hi team, any questions or anything?
+Anything you wanted to say?
+
+Nithyalakshmi Muthukaruppan [UNext]   2:10:23
+Yeah.
+
+Ravi Kumara [UNext]   2:10:25
+Yeah, you all know that total will be the last day.
+Tomorrow onwards, so everything will not disturb you, so we are giving the time for you people to explore and learn the more and more, more deeper, so before you are onboarding with the.
+So just to, yeah, if we do not have any queries, I just wanted to inform you that your Lumen LMS access will be there for more time. In fact, it will be available almost till this year end.
+in this 2026 year end.
+And yeah, in case in future if any assessments are conducted from credence before you are joining party.
+That is, so then, yeah, all those assessments will happen in this LMS platform only. Again, so you're already aware of that assessments and LMS platform, it's already will work now, so you can take the assessment.
+So as I mentioned, the LMS access will be there for a longer time. It will be there for till the year end of this 2026. So you can access the recording, you can access the contents any times and number of times.
+Even you can access the content from your mobile app as well, so just review the session, review the topics where you are felt some difficulty or anything, so try to export some more and more deeper concepts, because you are from Nancy's background, yeah, definitely you need some more revisions and some more understanding, so just try to do those things. Okay, so you have you have some good amount of time, I think, before you.
+Are getting into the to make your best benefit of those these timings. Just try to be a dedicate one to two hours of every day to just explore this data analytics concepts, data set concepts, and generic concepts, especially as you are joining by the analytics company only, so you need to be very well in this analytics skills.
+So that is my just advice. As a program coordinator, I have to advise, as a program manager, I have to advise you people, just make the best benefit of the session by cutting some of the session contents. I think already everyone has downloaded the pre-session files, post-session files from the LMS and keep it in somewhere in your systems or in wherever you're comfortable in your repository.
+But, whenever you want, you can easily can access no need to log into the LMS every time only for the session recording, definitely out of the you have to be log in and the auto refer.
+We can install the Lumen app in mobile also, so that while you are journeying, I will maybe you are traveling. OK, I can refer and revise the topics.
+Alright, team, I think with this note, we are good to conclude for the today. So I think we started the program on first week, that second of February. So it's almost a mid of April now, so 2 1/2 months. You all are with us and thank you for your patience and thank you for your interaction.
+And your response?
+And about, yeah, everything, everything throughout the program. So, we made our best things to provide you the best knowledge and hope the foundation, whatever it is planned, it is given to you all people. So, now you have to make that foundation very strong. So, before getting into the...
+So that's it, Tim. So just before you are all of you logging up, so we need your one or two minutes of time to provide this overall training feedback and NPS for the program. The link is available in the chat window. So please take a minute and provide this. So this is a mandatory feedback from all departments.
+But this will be shared with the uh, entity team as well. They wanted to understand, if anything, you have what is your experience in this program.
+So in this feedback only, we'll be able to see there is a final question. It is a NPS, Net Promoter Score.
+The parameter says.
+I like this, if you provide the score of nine and 10, it will be considered as a promoters means it's it says clearly like you are satisfied with the training, delivery, and everything, and any score below 88 or below, then it will represent passives and detectors. I don't think so anybody is there in this, but anyway, that is left to you because that is the...
+personally or individual chase and personal feedback. So based on that, you can just take a minute.
+And provide any comments also, what you find from the beginning of the program. That was everything is going well.
+What's your experience or any advice or if any implement still required?
+Maybe it will be in full for the feature batches as well.
+So while you are filling the feedback form, please take a minute and I will share my screen just for, give me a second.
+Hope you all see my screen right.
+So, this percentage I'm talking about, nothing. So, by this Sundays, I think, yeah, anyway, this foundation, the last module, journey module, and secure assessment and answer assessment is already available in the LMS for you peoples, so just to try to complete them. So, the due rate is given till 16th, 16th, and since today is Tuesday.
+So till Thursday, both the assessments are available. That is the last assessment from this program.
+Okay, so after that, once you complete all the assessments, so please ensure that this progress should show 100%. Okay, this is the demo ID. I'm just using for you people today just to give some introduction. Because you can see this only shows 4% because I have never logged into this ID and I have never access to anything.
+Yes, sometimes only just logged in. I'm just taking some screenshot from whenever there are assessments or something. That's why it's showing as only 4%. So please ensure that it should show 100% after 16. And maybe we can take two more days of time.
+Make sure that ensure that it should be shows 100%.
+I don't think so; it will show 100% for everyone, unless until you refer the session recordings. OK, if you are, you can just check, you can go back and check, so whatever the percentage showing, if it is showing less, they need less percentage, go back to the folder of session recording and just see if you have completed any. I mean, if you have missed any session, then you should refer that session recordings and it should match that.
+In that case, this probably should show 100%, otherwise it will not show 100%. OK, so that just one point, we just keep it in mind, so just to ensure all the contents I accept the recordings, alarm it shows 100% like this, so it is showing 100%, no? It should show 100% for all the...
+Topic: Smart Air Voice.
+Everything excluding the session recordings folder, even session recordings folder that is mandatory. Those who are missed any sessions or any part of the sessions, please go through the session recordings. In fact, we are given the title name also for each and every day session. The day number is there, date is there, along with the topic also is there.
+OK, for the DOC, DOC is there already with you, so if you want any doubt, I mean, if you have any doubts in that particular topics, then go come back to this particular session. So, in the same topics, only taught in this session, so just go back to this recording, sub revise.
+And do your own analysis as well. OK, not only this recordings, do some own analysis as well.
+And yeah, sure to complete this 100% progress. That's our team. This anybody is pending with any of these coding assessments, so we'll do one thing, but tomorrow we'll extend all these assessments once again. If they're already completed, no need to worry. If anybody has missed, OK, this is only this coding UNext labs exercises I'm tacking.
+So this will be extended till this Saturday or Sunday maybe. So please ensure if anybody has missed any coding assessments, UNext lab assessments, ensure to complete them so that it will, yeah, the progress, yeah, the progress will get automatically it will capture.
+So there are plenty of practice exercises given, Python exercises will be in the sense it is a Python coding Python exercise. So if it is not a P, then it should be SQL only.
+Should be SQL labs exercise.
+Hello team, so this is what I wanted to show. So please ensure that by this Sunday, I think it is an 18th right.
+Yeah, 18th, 18th, let us by 90th, is ensure to make it is at 100%.
+Because the Monday will be the final day to share the final report to the for each and every participant, so your attendance, your assessment scores, your LMS progress scores, so everything will be.
+So everything will be shared with the LND, so they will have it clear monitor on this. OK, so please make sure to complete that as soon as possible, latest by this Sunday.
+So I'll just take a pause here for a minute.
+Just to give you...
+Time to fill that overall training feedback and NPS score.
+If anybody is able to fill, please ensure to fill it, then I will.
+Take the queries out if you have anything.
+So it's a mandatory feedback team, so please I request all of you to each and every participant to please provide it with that file.
+Aishman, just to text me, you know, somewhere, maybe in the tomorrow morning, maybe in the WhatsApp or somewhere. I'll just check, get check this one. OK, regarding that one PDF you mentioned, which is not getting opened or it is not showing or something.
+The.
+So, I need to check with the LM with the back end LMS team, that's all, yeah.
+So, kindly allow you please provide the overall training feedback and NPS score, so it is a net promoter score.
+And if you have any, what's your experience and if you have any comments or anything, any improvements or anything, just feel free to mention in the.
+Anyway, we'll be here. Okay, so you all are there in the WhatsApp group as well. So if any queries or anything, you can write to via email or via WhatsApp, that is also fine, however you are comfortable. I'll be here for a longer time. If you have any queries or anything, please feel free to ask me.
+Either with an email, in call, in WhatsApp, somewhere wherever you're comfortable.
+I think all of you are filled up the feedback form and the overall MPS score. If anybody is at toast fill and provide it, please provide it. The link is allowed in the chat window.
+Yeah, if they are filled and everything is fine.
+Yeah, so if we have any queries, feel free to ask.
+And if you do not have any queries, yeah, I think I got to end up for the timing.
+Hello team, thank you. Thank you all. Thank you each and everyone.
+I wish you all the best, and...
+So, for your future endovers and your uh journey.
+Yeah, so today is the last day of your timing, so I wish you all the best for your future endos. Thank you, thank you, Anand. Thank you, Mansi, everyone. Thank you.
+Thank you all and good night and yeah, wish you all the best.
+
+Ravi Kumara [UNext] stopped transcription
