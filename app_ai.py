@@ -7,108 +7,70 @@ from openai import OpenAI
 import edge_tts
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
-import imageio_ffmpeg  # ensures ffmpeg is available
+import imageio_ffmpeg
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
 st.title("🎬 Transcript → Video Generator")
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# ---------------------------
-# 🧠 AI CALL
-# ---------------------------
-def call_ai(prompt):
-    res = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3,
-    )
-    return res.choices[0].message.content
 
 # ---------------------------
-# ✂️ SPLIT TEXT
+# 🎨 SLIDE IMAGE (UPDATED)
 # ---------------------------
-def split_text(text, size=6000):
-    return [text[i:i+size] for i in range(0, len(text), size)]
+def wrap_text(text, font, max_width, draw):
+    lines = []
+    words = text.split()
+    current = ""
 
-# ---------------------------
-# 🧠 FAST CHUNK SUMMARY
-# ---------------------------
-def summarize_chunks(text):
-    chunks = split_text(text)[:8]  # limit for speed
-    summaries = []
+    for word in words:
+        test = current + " " + word if current else word
+        w, _ = draw.textsize(test, font=font)
 
-    for i, chunk in enumerate(chunks):
-        st.write(f"🔄 Processing chunk {i+1}/{len(chunks)}")
+        if w <= max_width:
+            current = test
+        else:
+            lines.append(current)
+            current = word
 
-        s = call_ai(f"""
-Extract key concepts only.
-Keep it short.
+    if current:
+        lines.append(current)
 
-TEXT:
-{chunk}
-""")
-        summaries.append(s)
+    return lines
 
-    return "\n".join(summaries)
 
-# ---------------------------
-# 🧠 FINAL CONTENT
-# ---------------------------
-def generate_all(text):
-    raw = call_ai(f"""
-You are a teacher.
-
-Create a 5-minute video script.
-
-RULES:
-- Use ALL key concepts
-- 600–900 words total
-- 6–8 slides
-- Each explanation: 80–120 words
-
-RETURN JSON:
-
-{{
-  "summary": "...",
-  "slides": [
-    {{
-      "title": "...",
-      "points": ["..."],
-      "explanation": "..."
-    }}
-  ]
-}}
-
-TEXT:
-{text}
-""")
-
-    try:
-        start = raw.find("{")
-        end = raw.rfind("}") + 1
-        return json.loads(raw[start:end])
-    except:
-        return None
-
-# ---------------------------
-# 🎨 SLIDE IMAGE
-# ---------------------------
 def create_slide(title, points):
-    img = Image.new("RGB", (1280, 720), "#222")
+    img = Image.new("RGB", (1280, 720), "white")  # ✅ white bg
     draw = ImageDraw.Draw(img)
-    font = ImageFont.load_default()
 
-    draw.text((50, 40), title, fill="white", font=font)
+    # ✅ Load fonts
+    try:
+        title_font = ImageFont.truetype("fonts/DejaVuSans-Bold.ttf", 60)
+        text_font = ImageFont.truetype("fonts/DejaVuSans.ttf", 40)
+    except:
+        title_font = ImageFont.load_default()
+        text_font = ImageFont.load_default()
 
-    y = 150
+    # ✅ Centered title
+    draw.text((640, 70), title, fill="black", font=title_font, anchor="mm")
+
+    # ✅ Bullet points with wrapping
+    y = 180
+    max_width = 1000
+
     for p in points:
-        draw.text((80, y), f"• {p}", fill="white", font=font)
-        y += 50
+        lines = wrap_text(p, text_font, max_width, draw)
+
+        for line in lines:
+            draw.text((100, y), f"• {line}", fill="black", font=text_font)
+            y += 55
+
+        y += 10  # spacing between bullets
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
+
 
 # ---------------------------
 # 🔊 AUDIO
@@ -116,6 +78,7 @@ def create_slide(title, points):
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(text, voice="en-US-AriaNeural")
     await communicate.save(path)
+
 
 def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
@@ -125,6 +88,7 @@ def generate_audio(text):
         loop = asyncio.new_event_loop()
         loop.run_until_complete(tts_async(text, path))
     return path
+
 
 # ---------------------------
 # 🎥 VIDEO
@@ -139,7 +103,7 @@ def generate_video(slides):
 
             audio_clip = AudioFileClip(audio)
 
-            # FIXED duration handling
+            # ✅ fixed duration method
             clip = ImageClip(img, duration=audio_clip.duration)
             clip = clip.set_audio(audio_clip)
 
@@ -163,43 +127,3 @@ def generate_video(slides):
     )
 
     return output
-
-# ---------------------------
-# 📥 UI
-# ---------------------------
-files = st.file_uploader(
-    "Upload transcripts",
-    type=["txt"],
-    accept_multiple_files=True
-)
-
-if st.button("Generate Video"):
-
-    if not files:
-        st.warning("Upload files")
-        st.stop()
-
-    texts = [f.read().decode("utf-8") for f in files]
-    merged = "\n\n".join(texts)
-
-    st.write("⚡ Step 1: Processing...")
-    chunk_summary = summarize_chunks(merged)
-
-    st.write("🧠 Step 2: Generating content...")
-    data = generate_all(chunk_summary)
-
-    if not data:
-        st.error("AI failed")
-        st.stop()
-
-    st.subheader("📄 Summary")
-    st.write(data["summary"])
-
-    st.write("🎬 Generating video...")
-    video = generate_video(data["slides"])
-
-    if video:
-        st.success("✅ Video Ready!")
-        st.video(video)
-    else:
-        st.error("Video failed")
