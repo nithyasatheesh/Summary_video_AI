@@ -1,124 +1,38 @@
 import streamlit as st
 import tempfile
-import json
 import asyncio
 import os
+import imageio
+import imageio_ffmpeg
 
-# ---------------------------
-# SAFE MOVIEPY IMPORT
-# ---------------------------
-MOVIEPY_AVAILABLE = True
-try:
-    import imageio_ffmpeg
-    os.environ["IMAGEIO_FFMPEG_EXE"] = imageio_ffmpeg.get_ffmpeg_exe()
-    from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
-except Exception as e:
-    MOVIEPY_AVAILABLE = False
-    MOVIEPY_ERROR = str(e)
-
-import edge_tts
 from PIL import Image, ImageDraw, ImageFont
-from openai import OpenAI
-
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-st.set_page_config(page_title="AI Video Generator", layout="centered")
-st.title("🎬 AI Transcript → HD Video Generator")
+import edge_tts
 
 # ---------------------------
-# STOP IF MOVIEPY MISSING
+# FFMPEG SETUP
 # ---------------------------
-if not MOVIEPY_AVAILABLE:
-    st.error("❌ MoviePy not installed")
-    st.code(MOVIEPY_ERROR)
-    st.stop()
+os.environ["IMAGEIO_FFMPEG_EXE"] = imageio_ffmpeg.get_ffmpeg_exe()
+
+st.set_page_config(page_title="Free AI Video Generator")
+st.title("🎬 Free Transcript → Video Generator")
 
 # ---------------------------
-# AI
+# SIMPLE FREE "AI"
 # ---------------------------
-def call_ai(prompt):
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        st.error(f"AI call failed: {e}")
-        return "{}"
-
-def clean_json(text):
-    if not text:
-        return "{}"
-    start = text.find("{")
-    end = text.rfind("}")
-    if start == -1 or end == -1:
-        return "{}"
-    return text[start:end+1]
-
 def generate_all(text):
-    raw = call_ai(f"""
-Create explanation slides.
+    paragraphs = text.split("\n\n")
 
-STRICT:
-- 10-12 slides
-- Each slide MUST include title, points, explanation
-- points = list of short bullets
+    slides = []
+    for i, para in enumerate(paragraphs[:10]):
+        sentences = [s.strip() for s in para.split(".") if s.strip()]
 
-Return JSON only.
-
-TEXT:
-{text}
-""")
-
-    try:
-        return json.loads(clean_json(raw))
-    except:
-        st.warning("⚠️ AI JSON invalid, using fallback")
-        return {"summary": "", "slides": []}
-
-# ---------------------------
-# VALIDATION (STRONG)
-# ---------------------------
-def validate_data(data):
-    if not isinstance(data, dict):
-        return {"summary": "", "slides": []}
-
-    slides = data.get("slides", [])
-
-    if not isinstance(slides, list):
-        slides = []
-
-    clean_slides = []
-
-    for s in slides:
-        if not isinstance(s, dict):
-            continue
-
-        title = str(s.get("title", "Untitled"))
-        points = s.get("points", ["No content"])
-        explanation = str(s.get("explanation", ""))
-
-        if not isinstance(points, list):
-            points = [str(points)]
-
-        clean_slides.append({
-            "title": title,
-            "points": points,
-            "explanation": explanation
+        slides.append({
+            "title": f"Topic {i+1}",
+            "points": sentences[:3],
+            "explanation": para[:200]
         })
 
-    if len(clean_slides) == 0:
-        clean_slides = [{
-            "title": "No Data",
-            "points": ["AI failed to generate slides"],
-            "explanation": "Please try again"
-        }]
-
-    return {
-        "summary": data.get("summary", ""),
-        "slides": clean_slides
-    }
+    return {"summary": text[:300], "slides": slides}
 
 # ---------------------------
 # FONTS
@@ -126,8 +40,8 @@ def validate_data(data):
 def get_fonts():
     try:
         return (
-            ImageFont.truetype("DejaVuSans-Bold.ttf", 72),
-            ImageFont.truetype("DejaVuSans.ttf", 42)
+            ImageFont.truetype("DejaVuSans-Bold.ttf", 60),
+            ImageFont.truetype("DejaVuSans.ttf", 36)
         )
     except:
         return (ImageFont.load_default(), ImageFont.load_default())
@@ -136,7 +50,7 @@ def get_fonts():
 # TEXT WRAP
 # ---------------------------
 def wrap_text(text, font, max_width):
-    words = str(text).split()
+    words = text.split()
     lines, line = [], ""
 
     for word in words:
@@ -151,24 +65,25 @@ def wrap_text(text, font, max_width):
     return lines
 
 # ---------------------------
-# SLIDE
+# SLIDE IMAGE
 # ---------------------------
 def create_slide(title, points):
     img = Image.new("RGB", (1280, 720), "#f9fafb")
     draw = ImageDraw.Draw(img)
+
     title_font, point_font = get_fonts()
 
-    draw.text((100, 60), str(title), fill="#111", font=title_font)
-    draw.line((100, 150, 1180, 150), fill="#ddd", width=4)
+    draw.text((80, 60), title, fill="#111", font=title_font)
+    draw.line((80, 140, 1200, 140), fill="#ccc", width=3)
 
-    y = 200
+    y = 180
     for p in points:
         lines = wrap_text(p, point_font, 1000)
         for i, line in enumerate(lines):
             prefix = "• " if i == 0 else "  "
-            draw.text((120, y), prefix + line, fill="#333", font=point_font)
-            y += 55
-        y += 20
+            draw.text((100, y), prefix + line, fill="#333", font=point_font)
+            y += 45
+        y += 15
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
@@ -179,7 +94,7 @@ def create_slide(title, points):
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
-        text=str(text)[:500],
+        text=text[:500],
         voice="en-US-JennyNeural"
     )
     await communicate.save(path)
@@ -195,50 +110,33 @@ def generate_audio(text):
     return path
 
 # ---------------------------
-# VIDEO
+# VIDEO (NO MOVIEPY)
 # ---------------------------
-def create_clip(img_path, audio_path):
-    audio = AudioFileClip(audio_path)
-    duration = max(audio.duration, 8)
-
-    clip = ImageClip(img_path).set_duration(duration)
-    clip = clip.set_audio(audio)
-
-    return clip
-
 def generate_video(slides):
-    clips = []
+    video_path = "final_video.mp4"
+    writer = imageio.get_writer(video_path, fps=1)
 
     for i, slide in enumerate(slides):
         st.write(f"Slide {i+1}/{len(slides)}")
 
-        title = slide.get("title", "Untitled")
-        points = slide.get("points", ["No content"])
-        explanation = slide.get("explanation", "")
+        img_path = create_slide(
+            slide.get("title", "Untitled"),
+            slide.get("points", [])
+        )
 
-        img = create_slide(title, points)
-        audio = generate_audio(explanation)
+        image = imageio.imread(img_path)
 
-        clips.append(create_clip(img, audio))
+        # repeat frame for duration (~3 sec)
+        for _ in range(3):
+            writer.append_data(image)
 
-    if not clips:
-        raise Exception("No clips generated")
-
-    final = concatenate_videoclips(clips, method="compose")
-
-    output = "final_video.mp4"
-    final.write_videofile(output, fps=24)
-
-    return output
+    writer.close()
+    return video_path
 
 # ---------------------------
 # UI
 # ---------------------------
-files = st.file_uploader(
-    "Upload transcript",
-    type=["txt"],
-    accept_multiple_files=True
-)
+files = st.file_uploader("Upload transcript", type=["txt"], accept_multiple_files=True)
 
 if st.button("Generate Video"):
 
@@ -250,13 +148,12 @@ if st.button("Generate Video"):
     merged = "\n\n".join(texts)
 
     data = generate_all(merged)
-    data = validate_data(data)
 
-    st.write("DEBUG:", data)
+    st.subheader("Summary")
+    st.write(data["summary"])
 
-    try:
-        video = generate_video(data["slides"])
-        st.video(video)
-    except Exception as e:
-        st.error(f"Video failed: {e}")
+    video = generate_video(data["slides"])
+
+    st.success("Done!")
+    st.video(video)
 
