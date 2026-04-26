@@ -5,10 +5,9 @@ import asyncio
 import os
 
 # ---------------------------
-# SAFE IMPORTS (MoviePy Fix)
+# SAFE MOVIEPY IMPORT
 # ---------------------------
 MOVIEPY_AVAILABLE = True
-
 try:
     import imageio_ffmpeg
     os.environ["IMAGEIO_FFMPEG_EXE"] = imageio_ffmpeg.get_ffmpeg_exe()
@@ -22,38 +21,24 @@ import edge_tts
 from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
 
+# ---------------------------
+# INIT
+# ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
 st.title("🎬 AI Transcript → HD Video Generator")
 
 # ---------------------------
-# WARNING IF MOVIEPY MISSING
+# STOP IF MOVIEPY MISSING
 # ---------------------------
 if not MOVIEPY_AVAILABLE:
     st.error("❌ MoviePy is not installed correctly.")
     st.code(MOVIEPY_ERROR)
-
-    st.info("""
-To fix this:
-
-1. Create a file named `requirements.txt`
-2. Add:
-
-moviepy==1.0.3
-imageio-ffmpeg==0.4.9
-imageio==2.31.1
-edge-tts
-Pillow
-openai
-streamlit
-
-3. Re-deploy / reboot app
-""")
     st.stop()
 
 # ---------------------------
-# AI
+# AI CALL
 # ---------------------------
 def call_ai(prompt):
     response = client.chat.completions.create(
@@ -73,10 +58,10 @@ STRICT RULES:
 - 12–15 slides
 - Each slide: MAX 3 bullet points
 - Each bullet: MAX 10 words
-- Use SIMPLE, CLEAR language
 - Explanation: 2 short sentences
 
-Return JSON only.
+Return STRICT JSON with:
+summary, slides (title, points, explanation)
 
 TEXT:
 {text}
@@ -84,9 +69,29 @@ TEXT:
     try:
         return json.loads(clean_json(raw))
     except:
-        st.error("AI parsing failed")
+        st.error("❌ AI JSON parsing failed")
         st.text(raw)
         st.stop()
+
+# ---------------------------
+# VALIDATION (FIXES KEYERROR)
+# ---------------------------
+def validate_data(data):
+    if "slides" not in data or not isinstance(data["slides"], list):
+        st.error("❌ Invalid AI response: 'slides' missing")
+        st.stop()
+
+    cleaned = []
+
+    for s in data["slides"]:
+        cleaned.append({
+            "title": s.get("title", "Untitled"),
+            "points": s.get("points", ["No content available"]),
+            "explanation": s.get("explanation", "No explanation available")
+        })
+
+    data["slides"] = cleaned
+    return data
 
 # ---------------------------
 # FONTS
@@ -122,7 +127,7 @@ def wrap_text(text, font, max_width):
     return lines
 
 # ---------------------------
-# SLIDE
+# SLIDE CREATION
 # ---------------------------
 def create_slide(title, points):
     img = Image.new("RGB", (1280, 720), "#f9fafb")
@@ -135,7 +140,7 @@ def create_slide(title, points):
 
     y = 200
     for p in points:
-        lines = wrap_text(p, point_font, 1000)
+        lines = wrap_text(str(p), point_font, 1000)
 
         for i, line in enumerate(lines):
             prefix = "• " if i == 0 else "  "
@@ -153,7 +158,7 @@ def create_slide(title, points):
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
-        text=text[:500],
+        text=str(text)[:500],
         voice="en-US-JennyNeural"
     )
     await communicate.save(path)
@@ -185,17 +190,27 @@ def generate_video(slides):
     clips = []
 
     for i, slide in enumerate(slides):
-        st.write(f"Slide {i+1}/{len(slides)}")
+        st.write(f"🎞️ Slide {i+1}/{len(slides)}")
 
-        img = create_slide(slide["title"], slide["points"])
-        audio = generate_audio(slide["explanation"])
+        title = slide.get("title", "Untitled")
+        points = slide.get("points", ["No content"])
+        explanation = slide.get("explanation", "")
+
+        img = create_slide(title, points)
+        audio = generate_audio(explanation)
 
         clips.append(create_clip(img, audio))
 
     final = concatenate_videoclips(clips, method="compose")
 
     output = "final_video.mp4"
-    final.write_videofile(output, fps=24)
+    final.write_videofile(
+        output,
+        fps=24,
+        codec="libx264",
+        audio_codec="aac",
+        bitrate="3000k"
+    )
 
     return output
 
@@ -214,19 +229,25 @@ if st.button("Generate Video"):
         st.warning("Upload files first")
         st.stop()
 
-    with st.spinner("Generating video..."):
+    with st.spinner("🎬 Generating video..."):
 
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
 
         data = generate_all(merged)
+        data = validate_data(data)
 
-        if "slides" not in data:
-            st.error("No slides generated")
+        st.write("DEBUG:", data)  # optional debug
+
+        st.subheader("📄 Summary")
+        st.write(data.get("summary", ""))
+
+        try:
+            video = generate_video(data["slides"])
+        except Exception as e:
+            st.error(f"❌ Video generation failed: {e}")
             st.stop()
 
-        video = generate_video(data["slides"])
-
-        st.success("Done!")
+        st.success("✅ Video Ready!")
         st.video(video)
 
