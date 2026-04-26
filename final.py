@@ -8,12 +8,11 @@ import asyncio
 from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
 import edge_tts
-from pydub import AudioSegment
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 
-st.title("🎬 AI Video Generator (Audio Fixed)")
+st.title("🎬 AI Video Generator (Stable Audio Version)")
 
 # ---------------------------
 # AI CONTENT
@@ -34,7 +33,7 @@ Return JSON:
 RULES:
 - 20 slides
 - each point 6–8 words
-- explain clearly
+- clear explanation
 
 TEXT:
 {text}
@@ -58,7 +57,7 @@ def create_slide(title, points):
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 80)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 85)
         point_font = ImageFont.truetype("DejaVuSans.ttf", 70)
     except:
         title_font = ImageFont.load_default()
@@ -79,7 +78,11 @@ def create_slide(title, points):
 # AUDIO
 # ---------------------------
 async def tts_async(text, path):
-    communicate = edge_tts.Communicate(text=text, voice="en-US-JennyNeural")
+    communicate = edge_tts.Communicate(
+        text=text,
+        voice="en-US-JennyNeural",
+        rate="-5%"
+    )
     await communicate.save(path)
 
 def create_audio(slides):
@@ -94,19 +97,20 @@ def create_audio(slides):
     loop.run_until_complete(tts_async(script, path))
     loop.close()
 
-    return path
+    return path, script
 
 # ---------------------------
-# VIDEO (SYNC WITH AUDIO)
+# VIDEO (ESTIMATE DURATION)
 # ---------------------------
-def create_video(slides, audio_path):
-    audio = AudioSegment.from_file(audio_path)
-    total_seconds = len(audio) / 1000
+def create_video(slides, script):
+    # estimate speech duration (~150 words/min)
+    words = len(script.split())
+    total_seconds = max(120, int(words / 2.5))  # ~150 wpm
 
     video_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
     writer = imageio.get_writer(video_path, fps=1)
 
-    per_slide = max(5, int(total_seconds / len(slides)))
+    per_slide = max(5, total_seconds // len(slides))
 
     for slide in slides:
         img = create_slide(slide["title"], slide["points"])
@@ -119,7 +123,7 @@ def create_video(slides, audio_path):
     return video_path
 
 # ---------------------------
-# MERGE (SAFE)
+# MERGE AUDIO + VIDEO
 # ---------------------------
 def merge(video, audio):
     output = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
@@ -139,7 +143,7 @@ def merge(video, audio):
         return output
 
     except:
-        st.warning("⚠️ Audio merge failed → playing separately")
+        st.warning("⚠️ Merge failed → showing separately")
         return None
 
 # ---------------------------
@@ -159,8 +163,8 @@ if file:
 
         slides = data["slides"]
 
-        audio = create_audio(slides)
-        video = create_video(slides, audio)
+        audio, script = create_audio(slides)
+        video = create_video(slides, script)
 
         final = merge(video, audio)
 
@@ -170,5 +174,4 @@ if file:
             st.video(final)
         else:
             st.video(video)
-            st.audio(audio)
 
