@@ -12,11 +12,10 @@ import imageio_ffmpeg
 st.set_page_config(page_title="AI Video Generator", layout="centered")
 st.title("🎬 Transcript → Video Generator")
 
-# ✅ Debug API key
+# Debug API key
 st.write("🔑 API KEY LOADED:", "OPENAI_API_KEY" in st.secrets)
 
 client = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY"))
-
 
 # ---------------------------
 # 🧠 AI CALL
@@ -33,13 +32,11 @@ def call_ai(prompt):
         st.error(f"❌ OpenAI Error: {e}")
         return None
 
-
 # ---------------------------
 # ✂️ SPLIT TEXT
 # ---------------------------
 def split_text(text, size=6000):
     return [text[i:i+size] for i in range(0, len(text), size)]
-
 
 # ---------------------------
 # 🧠 CHUNK SUMMARY
@@ -50,13 +47,11 @@ def summarize_chunks(text):
 
     for i, chunk in enumerate(chunks):
         st.write(f"🔄 Processing chunk {i+1}/{len(chunks)}")
-
         s = call_ai(f"Extract key concepts only:\n{chunk}")
         if s:
             summaries.append(s)
 
     return "\n".join(summaries)
-
 
 # ---------------------------
 # 🧠 FINAL CONTENT
@@ -94,9 +89,8 @@ TEXT:
         st.error(f"❌ JSON Parse Error: {e}")
         return None
 
-
 # ---------------------------
-# 🎨 TEXT WRAP
+# 🎨 TEXT WRAP (FIXED)
 # ---------------------------
 def wrap_text(text, font, max_width, draw):
     lines = []
@@ -105,7 +99,10 @@ def wrap_text(text, font, max_width, draw):
 
     for word in words:
         test = current + " " + word if current else word
-        w, _ = draw.textsize(test, font=font)
+
+        # ✅ FIX: use textbbox instead of textsize
+        bbox = draw.textbbox((0, 0), test, font=font)
+        w = bbox[2] - bbox[0]
 
         if w <= max_width:
             current = test
@@ -117,7 +114,6 @@ def wrap_text(text, font, max_width, draw):
         lines.append(current)
 
     return lines
-
 
 # ---------------------------
 # 🎨 SLIDE IMAGE
@@ -149,14 +145,12 @@ def create_slide(title, points):
     img.save(path)
     return path
 
-
 # ---------------------------
 # 🔊 AUDIO
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(text, voice="en-US-AriaNeural")
     await communicate.save(path)
-
 
 def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
@@ -166,7 +160,6 @@ def generate_audio(text):
         loop = asyncio.new_event_loop()
         loop.run_until_complete(tts_async(text, path))
     return path
-
 
 # ---------------------------
 # 🎥 VIDEO
@@ -210,7 +203,6 @@ def generate_video(slides):
     except Exception as e:
         st.error(f"❌ Video render error: {e}")
         return None
-
 
 # ---------------------------
 # 📥 UI
