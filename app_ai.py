@@ -125,8 +125,8 @@ def create_slide(title, points):
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("fonts/DejaVuSans-Bold.ttf", 60)
-        text_font = ImageFont.truetype("fonts/DejaVuSans.ttf", 40)
+        title_font = ImageFont.truetype("fonts/DejaVuSans-Bold.ttf", 50)
+        text_font = ImageFont.truetype("fonts/DejaVuSans.ttf", 30)
     except:
         title_font = ImageFont.load_default()
         text_font = ImageFont.load_default()
