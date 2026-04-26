@@ -123,8 +123,8 @@ def create_slide(title, points):
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("fonts/DejaVuSans-Bold.ttf", 60)
-        text_font = ImageFont.truetype("fonts/DejaVuSans.ttf", 40)
+        title_font = ImageFont.truetype("fonts/DejaVuSans-Bold.ttf", 50)
+        text_font = ImageFont.truetype("fonts/DejaVuSans.ttf", 20)
     except Exception as e:
         st.warning(f"Font load failed: {e}")
         title_font = ImageFont.load_default()
