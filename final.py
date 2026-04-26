@@ -11,7 +11,7 @@ from openai import OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(page_title="AI Video Generator")
-st.title("🎬 Stable AI Video Generator")
+st.title("🎬 AI Video Generator (Clean + Big Text)")
 
 # ---------------------------
 # AI (SAFE)
@@ -24,6 +24,11 @@ def generate_all(text):
                 "role": "user",
                 "content": f"""
 Create slides.
+
+RULES:
+- 6 slides
+- 2 short points per slide
+- very simple language
 
 Return JSON:
 {{
@@ -40,8 +45,6 @@ TEXT:
         )
 
         raw = res.choices[0].message.content
-
-        # try parsing
         data = json.loads(raw)
 
         if not data.get("slides"):
@@ -50,7 +53,6 @@ TEXT:
         return data
 
     except:
-        # 🔥 fallback (prevents empty video)
         return {
             "summary": "Fallback summary",
             "slides": [
@@ -62,72 +64,88 @@ TEXT:
         }
 
 # ---------------------------
-# SLIDE DESIGN
+# SLIDE DESIGN (BIG + CLEAN)
 # ---------------------------
 def create_slide(title, points):
-    img = Image.new("RGB", (854, 480), "#f8fafc")
+    img = Image.new("RGB", (1280, 720), "#f8fafc")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 40)
-        point_font = ImageFont.truetype("DejaVuSans.ttf", 28)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 90)
+        point_font = ImageFont.truetype("DejaVuSans.ttf", 60)
     except:
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    draw.text((40, 30), str(title), fill="#111", font=title_font)
+    # Center title
+    bbox = draw.textbbox((0, 0), title, font=title_font)
+    draw.text(((1280 - bbox[2]) / 2, 80), title, fill="#111", font=title_font)
 
-    y = 120
+    # Divider
+    draw.line((150, 200, 1130, 200), fill="#ccc", width=4)
+
+    y = 260
+
     for p in points:
-        draw.text((60, y), str(p), fill="#222", font=point_font)
-        y += 40
+        words = p.split()
+        lines = []
+        line = ""
+
+        for word in words:
+            test = line + word + " "
+            if point_font.getbbox(test)[2] < 900:
+                line = test
+            else:
+                lines.append(line)
+                line = word + " "
+        lines.append(line)
+
+        for line in lines:
+            bbox = draw.textbbox((0, 0), line, font=point_font)
+            draw.text(((1280 - bbox[2]) / 2, y), line.strip(), fill="#222", font=point_font)
+            y += 80
+
+        y += 30
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# VIDEO (FIXED)
+# VIDEO GENERATION (FIXED)
 # ---------------------------
 def generate_video(slides):
     if not slides:
-        st.error("❌ No slides → cannot create video")
+        st.error("No slides found")
         return None
 
     video_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
+    writer = imageio.get_writer(video_path, fps=1)
 
-    try:
-        writer = imageio.get_writer(video_path, fps=1)
+    frame_count = 0
 
-        frame_count = 0
+    for i, slide in enumerate(slides):
+        st.write(f"Slide {i+1}/{len(slides)}")
 
-        for i, slide in enumerate(slides):
-            st.write(f"Processing slide {i+1}/{len(slides)}")
+        img = create_slide(
+            slide.get("title", "Untitled"),
+            slide.get("points", ["No content"])
+        )
 
-            img = create_slide(
-                slide.get("title", "Untitled"),
-                slide.get("points", ["No content"])
-            )
+        frame = imageio.imread(img)
 
-            frame = imageio.imread(img)
+        # Force duration (2 sec per slide)
+        for _ in range(2):
+            writer.append_data(frame)
+            frame_count += 1
 
-            # 🔥 force 2 seconds per slide
-            for _ in range(2):
-                writer.append_data(frame)
-                frame_count += 1
+    writer.close()
 
-        writer.close()
-
-        # 🔥 prevent empty video
-        if frame_count == 0:
-            st.error("❌ Video is empty (no frames written)")
-            return None
-
-        return video_path
-
-    except Exception as e:
-        st.error(f"Video error: {e}")
+    if frame_count == 0:
+        st.error("Video empty")
         return None
+
+    return video_path
 
 # ---------------------------
 # UI
@@ -145,14 +163,12 @@ if file:
         st.write(data.get("summary", ""))
 
         slides = data.get("slides", [])
-
-        st.write("Slides count:", len(slides))  # debug
+        st.write("Slides:", len(slides))
 
         video = generate_video(slides)
 
         if video:
-            st.success("✅ Video generated!")
+            st.success("✅ Video Ready!")
             st.video(video)
         else:
             st.error("❌ Failed to generate video")
-
