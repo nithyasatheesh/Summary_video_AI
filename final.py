@@ -2,19 +2,55 @@ import streamlit as st
 import tempfile
 import json
 import asyncio
+import os
+
+# ---------------------------
+# SAFE IMPORTS (MoviePy Fix)
+# ---------------------------
+MOVIEPY_AVAILABLE = True
+
+try:
+    import imageio_ffmpeg
+    os.environ["IMAGEIO_FFMPEG_EXE"] = imageio_ffmpeg.get_ffmpeg_exe()
+
+    from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
+except Exception as e:
+    MOVIEPY_AVAILABLE = False
+    MOVIEPY_ERROR = str(e)
 
 import edge_tts
-from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
 
-# ---------------------------
-# INIT
-# ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
 st.title("🎬 AI Transcript → HD Video Generator")
+
+# ---------------------------
+# WARNING IF MOVIEPY MISSING
+# ---------------------------
+if not MOVIEPY_AVAILABLE:
+    st.error("❌ MoviePy is not installed correctly.")
+    st.code(MOVIEPY_ERROR)
+
+    st.info("""
+To fix this:
+
+1. Create a file named `requirements.txt`
+2. Add:
+
+moviepy==1.0.3
+imageio-ffmpeg==0.4.9
+imageio==2.31.1
+edge-tts
+Pillow
+openai
+streamlit
+
+3. Re-deploy / reboot app
+""")
+    st.stop()
 
 # ---------------------------
 # AI
@@ -38,49 +74,41 @@ STRICT RULES:
 - Each slide: MAX 3 bullet points
 - Each bullet: MAX 10 words
 - Use SIMPLE, CLEAR language
-- Explanation: 2 short sentences (spoken style)
+- Explanation: 2 short sentences
 
-Return JSON only:
-{{
- "summary": "...",
- "slides": [
-   {{
-     "title": "...",
-     "points": ["...", "..."],
-     "explanation": "..."
-   }}
- ]
-}}
+Return JSON only.
 
 TEXT:
 {text}
 """)
     try:
         return json.loads(clean_json(raw))
-    except Exception as e:
-        st.error("❌ AI response parsing failed")
+    except:
+        st.error("AI parsing failed")
         st.text(raw)
-        raise e
+        st.stop()
 
 # ---------------------------
 # FONTS
 # ---------------------------
 def get_fonts():
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 72)
-        point_font = ImageFont.truetype("DejaVuSans.ttf", 42)
+        return (
+            ImageFont.truetype("DejaVuSans-Bold.ttf", 72),
+            ImageFont.truetype("DejaVuSans.ttf", 42)
+        )
     except:
-        title_font = ImageFont.load_default()
-        point_font = ImageFont.load_default()
-    return title_font, point_font
+        return (
+            ImageFont.load_default(),
+            ImageFont.load_default()
+        )
 
 # ---------------------------
 # TEXT WRAP
 # ---------------------------
 def wrap_text(text, font, max_width):
     words = text.split()
-    lines = []
-    line = ""
+    lines, line = [], ""
 
     for word in words:
         test = line + word + " "
@@ -94,7 +122,7 @@ def wrap_text(text, font, max_width):
     return lines
 
 # ---------------------------
-# SLIDE DESIGN (HD)
+# SLIDE
 # ---------------------------
 def create_slide(title, points):
     img = Image.new("RGB", (1280, 720), "#f9fafb")
@@ -102,14 +130,10 @@ def create_slide(title, points):
 
     title_font, point_font = get_fonts()
 
-    # Title
     draw.text((100, 60), title, fill="#111", font=title_font)
-
-    # Divider
     draw.line((100, 150, 1180, 150), fill="#ddd", width=4)
 
     y = 200
-
     for p in points:
         lines = wrap_text(p, point_font, 1000)
 
@@ -121,18 +145,16 @@ def create_slide(title, points):
         y += 20
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-    img.save(path, quality=95)
+    img.save(path)
     return path
 
 # ---------------------------
-# TTS (SAFE ASYNC)
+# TTS
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
         text=text[:500],
-        voice="en-US-JennyNeural",
-        rate="-5%",
-        pitch="+2Hz"
+        voice="en-US-JennyNeural"
     )
     await communicate.save(path)
 
@@ -147,26 +169,23 @@ def generate_audio(text):
     return path
 
 # ---------------------------
-# VIDEO CLIP
+# VIDEO
 # ---------------------------
 def create_clip(img_path, audio_path):
     audio = AudioFileClip(audio_path)
     duration = max(audio.duration, 10)
 
     clip = ImageClip(img_path).set_duration(duration)
-    clip = clip.resize(lambda t: 1 + 0.02 * t)  # zoom effect
+    clip = clip.resize(lambda t: 1 + 0.02 * t)
     clip = clip.set_audio(audio)
 
     return clip
 
-# ---------------------------
-# VIDEO GENERATION
-# ---------------------------
 def generate_video(slides):
     clips = []
 
     for i, slide in enumerate(slides):
-        st.write(f"🎞️ Processing slide {i+1}/{len(slides)}")
+        st.write(f"Slide {i+1}/{len(slides)}")
 
         img = create_slide(slide["title"], slide["points"])
         audio = generate_audio(slide["explanation"])
@@ -176,14 +195,7 @@ def generate_video(slides):
     final = concatenate_videoclips(clips, method="compose")
 
     output = "final_video.mp4"
-    final.write_videofile(
-        output,
-        fps=24,
-        codec="libx264",
-        audio_codec="aac",
-        bitrate="3000k",
-        preset="medium"
-    )
+    final.write_videofile(output, fps=24)
 
     return output
 
@@ -202,27 +214,19 @@ if st.button("Generate Video"):
         st.warning("Upload files first")
         st.stop()
 
-    with st.spinner("🎬 Generating video..."):
+    with st.spinner("Generating video..."):
 
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
 
         data = generate_all(merged)
 
-        # Debug (optional)
         if "slides" not in data:
-            st.error("❌ No slides returned from AI")
+            st.error("No slides generated")
             st.stop()
 
-        st.subheader("📄 Summary")
-        st.write(data.get("summary", ""))
+        video = generate_video(data["slides"])
 
-        try:
-            video = generate_video(data["slides"])
-        except Exception as e:
-            st.error(f"❌ Video generation failed: {e}")
-            st.stop()
-
-        st.success("✅ Video Ready!")
+        st.success("Done!")
         st.video(video)
 
