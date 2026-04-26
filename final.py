@@ -2,107 +2,96 @@ import streamlit as st
 import tempfile
 import json
 import imageio.v2 as imageio
+import imageio_ffmpeg
+import subprocess
 import asyncio
 from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
 import edge_tts
 
+# ---------------------------
+# INIT
+# ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 
-st.title("🎬 YouTube Automation Video Generator")
+st.title("🎬 AI Video Generator (Final Fixed)")
 
 # ---------------------------
-# AI (STORY STYLE)
+# AI CONTENT
 # ---------------------------
 def generate_content(text):
     text = text[:1500]
 
-    res = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{
-            "role": "user",
-            "content": f"""
-Create engaging YouTube script.
-
-STRUCTURE:
-- Hook (2 slides)
-- Main content (12 slides)
-- Recap (2 slides)
+    try:
+        res = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{
+                "role": "user",
+                "content": f"""
+Return JSON only.
 
 RULES:
-- Each slide: max 4 words
-- Powerful words
-- simple language
+- 15 slides
+- max 4 words per slide
 
-Return JSON:
+FORMAT:
 {{"slides":[{{"title":"...","text":"..."}}]}}
 
 TEXT:
 {text}
 """
-        }]
-    )
+            }]
+        )
 
-    raw = res.choices[0].message.content
-    clean = raw[raw.find("{"):raw.rfind("}")+1]
-    return json.loads(clean)
+        raw = res.choices[0].message.content
+        clean = raw[raw.find("{"):raw.rfind("}")+1]
+        return json.loads(clean)
 
-# ---------------------------
-# GRADIENT BACKGROUND
-# ---------------------------
-def gradient_bg():
-    img = Image.new("RGB", (1280, 720))
-    draw = ImageDraw.Draw(img)
-
-    for y in range(720):
-        r = int(10 + y * 0.1)
-        g = int(20 + y * 0.05)
-        b = int(40 + y * 0.2)
-        draw.line([(0, y), (1280, y)], fill=(r, g, b))
-
-    return img
+    except:
+        return {"slides":[{"title":"Retry","text":"Try again"}]}
 
 # ---------------------------
-# CINEMATIC SLIDE
+# WHITE SLIDE (BIG TEXT)
 # ---------------------------
 def create_slide(title, text):
-    img = gradient_bg()
+    img = Image.new("RGB", (1280, 720), "white")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 110)
-        text_font = ImageFont.truetype("DejaVuSans.ttf", 170)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 140)
+        text_font = ImageFont.truetype("DejaVuSans.ttf", 180)
     except:
         title_font = ImageFont.load_default()
         text_font = ImageFont.load_default()
 
-    # Title
+    # TITLE (CENTER)
     tb = draw.textbbox((0,0), title, font=title_font)
-    draw.text(((1280-tb[2])//2, 80), title, fill="#FFD700", font=title_font)
+    draw.text(((1280-tb[2])//2, 80), title, fill="black", font=title_font)
 
-    # Text
+    # TEXT (CENTER BIG)
     bb = draw.textbbox((0,0), text, font=text_font)
-    draw.text(((1280-bb[2])//2, 320), text, fill="#00E5FF", font=text_font)
+    draw.text(((1280-bb[2])//2, 320), text, fill="black", font=text_font)
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# VIDEO (ZOOM EFFECT)
+# VIDEO
 # ---------------------------
 def create_video(slides):
     video_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
-    writer = imageio.get_writer(video_path, fps=2)
+    writer = imageio.get_writer(video_path, fps=1)
 
-    total_time = 240  # 4 min
-    per_slide = total_time // len(slides)
+    total_duration = 240  # 4 min
+    per_slide = total_duration // len(slides)
 
     for slide in slides:
         img = create_slide(slide["title"], slide["text"])
         frame = imageio.imread(img)
 
-        for i in range(per_slide):
+        for _ in range(per_slide):
             writer.append_data(frame)
 
     writer.close()
@@ -115,7 +104,7 @@ async def tts_async(text, path):
     communicate = edge_tts.Communicate(
         text=text,
         voice="en-US-JennyNeural",
-        rate="-5%"
+        rate="-10%"
     )
     await communicate.save(path)
 
@@ -132,6 +121,27 @@ def create_audio(slides):
     return path
 
 # ---------------------------
+# MERGE AUDIO + VIDEO
+# ---------------------------
+def merge(video, audio):
+    output = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
+
+    cmd = [
+        FFMPEG,
+        "-y",
+        "-i", video,
+        "-i", audio,
+        "-c:v", "copy",
+        "-c:a", "aac",
+        "-shortest",
+        output
+    ]
+
+    subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    return output
+
+# ---------------------------
 # UI
 # ---------------------------
 file = st.file_uploader("Upload transcript", type=["txt"])
@@ -139,7 +149,7 @@ file = st.file_uploader("Upload transcript", type=["txt"])
 if file:
     text = file.read().decode("utf-8")
 
-    if st.button("Generate Cinematic Video"):
+    if st.button("Generate Final Video"):
 
         data = generate_content(text)
         slides = data["slides"]
@@ -147,10 +157,7 @@ if file:
         video = create_video(slides)
         audio = create_audio(slides)
 
-        st.success("🔥 Cinematic Video Ready!")
+        final = merge(video, audio)
 
-        st.video(video)
-
-        st.subheader("🔊 Voice Narration")
-        st.audio(audio)
-
+        st.success("✅ FINAL VIDEO READY")
+        st.video(final)
