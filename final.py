@@ -2,20 +2,15 @@ import streamlit as st
 import tempfile
 import json
 import imageio.v2 as imageio
-import imageio_ffmpeg
-import subprocess
-import asyncio
 from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
-import edge_tts
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 
-st.title("🎬 AI Video Generator (Stable Audio Version)")
+st.title("🎬 AI Video Generator (FINAL CLEAN VERSION)")
 
 # ---------------------------
-# AI CONTENT
+# AI CONTENT (MORE SLIDES, SIMPLE TEXT)
 # ---------------------------
 def generate_content(text):
     text = text[:2000]
@@ -26,94 +21,97 @@ Return JSON:
 {{
  "summary": "...",
  "slides":[
-  {{"title":"...","points":["...","..."]}}
+  {{"title":"...","text":"..."}}
  ]
 }}
 
 RULES:
-- 20 slides
-- each point 6–8 words
-- clear explanation
+- 25–30 slides
+- each slide ONE sentence
+- max 6–7 words
+- no bullets
+- simple explanation
+- cover topic fully
 
 TEXT:
 {text}
 """
 
-    res = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role":"user","content":prompt}]
-    )
+    try:
+        res = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role":"user","content":prompt}]
+        )
 
-    raw = res.choices[0].message.content
-    clean = raw[raw.find("{"):raw.rfind("}")+1]
+        raw = res.choices[0].message.content
+        clean = raw[raw.find("{"):raw.rfind("}")+1]
 
-    return json.loads(clean)
+        return json.loads(clean)
+
+    except:
+        return {
+            "summary":"Error generating summary",
+            "slides":[{"title":"Retry","text":"Try again"}]
+        }
 
 # ---------------------------
-# SLIDE DESIGN
+# SLIDE (BIG TEXT LEFT)
 # ---------------------------
-def create_slide(title, points):
+def create_slide(title, text):
     img = Image.new("RGB", (1280, 720), "white")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 85)
-        point_font = ImageFont.truetype("DejaVuSans.ttf", 70)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 90)
+        text_font = ImageFont.truetype("DejaVuSans.ttf", 120)
     except:
         title_font = ImageFont.load_default()
-        point_font = ImageFont.load_default()
+        text_font = ImageFont.load_default()
 
-    draw.text((80, 60), title, fill="black", font=title_font)
+    # Title
+    draw.text((80, 80), title, fill="black", font=title_font)
 
-    y = 180
-    for p in points:
-        draw.text((80, y), "• " + p, fill="black", font=point_font)
-        y += 100
+    # Divider
+    draw.line((80, 180, 1200, 180), fill="#ccc", width=3)
+
+    # Wrap text
+    words = text.split()
+    lines, line = [], ""
+
+    for w in words:
+        test = line + w + " "
+        if draw.textbbox((0,0), test, font=text_font)[2] < 1100:
+            line = test
+        else:
+            lines.append(line)
+            line = w + " "
+    lines.append(line)
+
+    y = 260
+    for ln in lines:
+        draw.text((80, y), ln.strip(), fill="black", font=text_font)
+        y += 130
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# AUDIO
+# VIDEO (FORCE 4–5 MIN)
 # ---------------------------
-async def tts_async(text, path):
-    communicate = edge_tts.Communicate(
-        text=text,
-        voice="en-US-JennyNeural",
-        rate="-5%"
-    )
-    await communicate.save(path)
-
-def create_audio(slides):
-    script = ". ".join(
-        [" ".join(s["points"]) for s in slides]
-    )
-
-    path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(tts_async(script, path))
-    loop.close()
-
-    return path, script
-
-# ---------------------------
-# VIDEO (ESTIMATE DURATION)
-# ---------------------------
-def create_video(slides, script):
-    # estimate speech duration (~150 words/min)
-    words = len(script.split())
-    total_seconds = max(120, int(words / 2.5))  # ~150 wpm
-
+def create_video(slides):
     video_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
     writer = imageio.get_writer(video_path, fps=1)
 
-    per_slide = max(5, total_seconds // len(slides))
+    target_duration = 300  # 5 minutes
 
-    for slide in slides:
-        img = create_slide(slide["title"], slide["points"])
+    n = len(slides)
+    per_slide = max(10, target_duration // n)
+
+    for i, slide in enumerate(slides):
+        st.write(f"Slide {i+1}/{n}")
+
+        img = create_slide(slide["title"], slide["text"])
         frame = imageio.imread(img)
 
         for _ in range(per_slide):
@@ -121,30 +119,6 @@ def create_video(slides, script):
 
     writer.close()
     return video_path
-
-# ---------------------------
-# MERGE AUDIO + VIDEO
-# ---------------------------
-def merge(video, audio):
-    output = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
-
-    try:
-        subprocess.run([
-            FFMPEG,
-            "-y",
-            "-i", video,
-            "-i", audio,
-            "-c:v", "copy",
-            "-c:a", "aac",
-            "-shortest",
-            output
-        ], check=True)
-
-        return output
-
-    except:
-        st.warning("⚠️ Merge failed → showing separately")
-        return None
 
 # ---------------------------
 # UI
@@ -158,20 +132,14 @@ if file:
 
         data = generate_content(text)
 
+        # Summary
         st.subheader("📄 Summary")
-        st.write(data["summary"])
+        st.write(data.get("summary", ""))
 
-        slides = data["slides"]
+        slides = data.get("slides", [])
 
-        audio, script = create_audio(slides)
-        video = create_video(slides, script)
+        video = create_video(slides)
 
-        final = merge(video, audio)
-
-        st.success("✅ Done!")
-
-        if final:
-            st.video(final)
-        else:
-            st.video(video)
+        st.success("✅ Video Ready!")
+        st.video(video)
 
