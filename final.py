@@ -1,3 +1,4 @@
+```python
 import streamlit as st
 import tempfile
 import json
@@ -11,7 +12,7 @@ from openai import OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
-st.title("🎬 AI Transcript → 3-5 Min Video Generator")
+st.title("🎬 AI Transcript → HD Video Generator")
 
 # ---------------------------
 # AI
@@ -30,12 +31,24 @@ def generate_all(text):
     raw = call_ai(f"""
 Create a COMPLETE explanation.
 
-STRICT:
-- 12 to 18 slides
-- Max 4 bullet points per slide
-- Explanation: 2–3 sentences
+STRICT RULES:
+- 12–15 slides
+- Each slide: MAX 3 bullet points
+- Each bullet: MAX 10 words
+- Use SIMPLE, CLEAR language
+- Explanation: 2 short sentences (spoken style)
 
-Return JSON only.
+Return JSON only:
+{{
+ "summary": "...",
+ "slides": [
+   {{
+     "title": "...",
+     "points": ["...", "..."],
+     "explanation": "..."
+   }}
+ ]
+}}
 
 TEXT:
 {text}
@@ -43,7 +56,19 @@ TEXT:
     return json.loads(clean_json(raw))
 
 # ---------------------------
-# TEXT WRAP (BETTER)
+# FONTS
+# ---------------------------
+def get_fonts():
+    try:
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 72)
+        point_font = ImageFont.truetype("DejaVuSans.ttf", 42)
+    except:
+        title_font = ImageFont.load_default()
+        point_font = ImageFont.load_default()
+    return title_font, point_font
+
+# ---------------------------
+# TEXT WRAP
 # ---------------------------
 def wrap_text(text, font, max_width):
     words = text.split()
@@ -62,55 +87,45 @@ def wrap_text(text, font, max_width):
     return lines
 
 # ---------------------------
-# SLIDE DESIGN (UPGRADED)
+# SLIDE DESIGN (HD)
 # ---------------------------
 def create_slide(title, points):
-    img = Image.new("RGB", (854, 480), "white")
+    img = Image.new("RGB", (1280, 720), "#f9fafb")
     draw = ImageDraw.Draw(img)
 
-    try:
-        title_font = ImageFont.truetype("arial.ttf", 65)   # 🔥 bigger
-        point_font = ImageFont.truetype("arial.ttf", 40)   # 🔥 bigger
-    except:
-        title_font = ImageFont.load_default()
-        point_font = ImageFont.load_default()
+    title_font, point_font = get_fonts()
 
-    # Center Title
-    bbox = draw.textbbox((0, 0), title, font=title_font)
-    title_w = bbox[2]
-    draw.text(((854 - title_w) / 2, 30), title, fill="black", font=title_font)
+    # Title
+    draw.text((100, 60), title, fill="#111", font=title_font)
 
     # Divider
-    draw.line((80, 120, 770, 120), fill="#444", width=3)
+    draw.line((100, 150, 1180, 150), fill="#ddd", width=4)
 
-    y = 160
+    y = 200
 
     for p in points:
-        # Bullet circle
-        bullet_x = 90
-        draw.ellipse((bullet_x, y+12, bullet_x+14, y+26), fill="#222")
+        lines = wrap_text(p, point_font, 1000)
 
-        # Wrapped text
-        lines = wrap_text(p, point_font, 600)
+        for i, line in enumerate(lines):
+            prefix = "• " if i == 0 else "  "
+            draw.text((120, y), prefix + line, fill="#333", font=point_font)
+            y += 55
 
-        for line in lines:
-            draw.text((120, y), line, fill="#111", font=point_font)
-            y += 48  # 🔥 better spacing
-
-        y += 15  # space between bullets
+        y += 20
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-    img.save(path)
+    img.save(path, quality=95)
     return path
 
 # ---------------------------
-# TTS (UNCHANGED VOICE)
+# TTS
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
-        text=text[:400],
-        voice="en-US-AriaNeural",
-        rate="-10%"
+        text=text[:500],
+        voice="en-US-JennyNeural",
+        rate="-5%",
+        pitch="+2Hz"
     )
     await communicate.save(path)
 
@@ -120,16 +135,23 @@ def generate_audio(text):
     return path
 
 # ---------------------------
-# VIDEO
+# VIDEO CLIP (Zoom Effect)
 # ---------------------------
 def create_clip(img_path, audio_path):
     audio = AudioFileClip(audio_path)
     duration = max(audio.duration, 10)
 
-    clip = ImageClip(img_path).with_duration(duration)
-    clip = clip.with_audio(audio)
+    clip = (
+        ImageClip(img_path)
+        .with_duration(duration)
+        .resize(lambda t: 1 + 0.02 * t)  # subtle zoom
+        .with_audio(audio)
+    )
     return clip
 
+# ---------------------------
+# VIDEO GENERATION
+# ---------------------------
 def generate_video(slides):
     clips = []
 
@@ -144,9 +166,11 @@ def generate_video(slides):
     output = "final_video.mp4"
     final.write_videofile(
         output,
-        fps=12,
-        preset="ultrafast",
-        threads=2
+        fps=24,
+        codec="libx264",
+        audio_codec="aac",
+        bitrate="3000k",
+        preset="medium"
     )
 
     return output
@@ -175,8 +199,9 @@ if st.button("Generate Video"):
 
         st.subheader("📄 Summary")
         st.write(data["summary"])
+
         video = generate_video(data["slides"])
 
         st.success("✅ Video Ready!")
         st.video(video)
-
+```
