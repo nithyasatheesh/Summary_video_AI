@@ -7,6 +7,7 @@ from openai import OpenAI
 import edge_tts
 from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
+from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
 st.title("🎬 Transcript → Video Generator")
