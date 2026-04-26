@@ -2,26 +2,18 @@ import streamlit as st
 import tempfile
 import json
 import imageio.v2 as imageio
-import imageio_ffmpeg
-import subprocess
-import asyncio
 from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
-import edge_tts
 
-# ---------------------------
-# INIT
-# ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 
-st.title("🎬 AI Video Generator (Final Fixed)")
+st.title("🎬 AI Video Generator (Left Layout + Summary)")
 
 # ---------------------------
 # AI CONTENT
 # ---------------------------
 def generate_content(text):
-    text = text[:1500]
+    text = text[:2000]
 
     try:
         res = client.chat.completions.create(
@@ -31,12 +23,18 @@ def generate_content(text):
                 "content": f"""
 Return JSON only.
 
+FORMAT:
+{{
+ "summary": "...",
+ "slides":[
+  {{"title":"...","text":"..."}}
+ ]
+}}
+
 RULES:
 - 15 slides
-- max 4 words per slide
-
-FORMAT:
-{{"slides":[{{"title":"...","text":"..."}}]}}
+- each slide max 6 words
+- simple explanation
 
 TEXT:
 {text}
@@ -49,45 +47,51 @@ TEXT:
         return json.loads(clean)
 
     except:
-        return {"slides":[{"title":"Retry","text":"Try again"}]}
+        return {
+            "summary": "Error generating summary",
+            "slides":[{"title":"Retry","text":"Try again"}]
+        }
 
 # ---------------------------
-# WHITE SLIDE (BIG TEXT)
+# LEFT-ALIGNED SLIDE
 # ---------------------------
 def create_slide(title, text):
     img = Image.new("RGB", (1280, 720), "white")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 140)
-        text_font = ImageFont.truetype("DejaVuSans.ttf", 180)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 90)
+        text_font = ImageFont.truetype("DejaVuSans.ttf", 110)
     except:
         title_font = ImageFont.load_default()
         text_font = ImageFont.load_default()
 
-    # TITLE (CENTER)
-    tb = draw.textbbox((0,0), title, font=title_font)
-    draw.text(((1280-tb[2])//2, 80), title, fill="black", font=title_font)
+    # Title (LEFT)
+    draw.text((80, 80), title, fill="black", font=title_font)
 
-    # TEXT (CENTER BIG)
-    bb = draw.textbbox((0,0), text, font=text_font)
-    draw.text(((1280-bb[2])//2, 320), text, fill="black", font=text_font)
+    # Divider
+    draw.line((80, 200, 1200, 200), fill="#ccc", width=4)
+
+    # Text (LEFT BIG)
+    draw.text((80, 300), text, fill="black", font=text_font)
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# VIDEO
+# VIDEO GENERATION (3–5 MIN)
 # ---------------------------
 def create_video(slides):
     video_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
     writer = imageio.get_writer(video_path, fps=1)
 
-    total_duration = 240  # 4 min
-    per_slide = total_duration // len(slides)
+    total_duration = 240  # 4 minutes
+    per_slide = max(10, total_duration // len(slides))
 
-    for slide in slides:
+    for i, slide in enumerate(slides):
+        st.write(f"Slide {i+1}/{len(slides)}")
+
         img = create_slide(slide["title"], slide["text"])
         frame = imageio.imread(img)
 
@@ -98,66 +102,30 @@ def create_video(slides):
     return video_path
 
 # ---------------------------
-# AUDIO
-# ---------------------------
-async def tts_async(text, path):
-    communicate = edge_tts.Communicate(
-        text=text,
-        voice="en-US-JennyNeural",
-        rate="-10%"
-    )
-    await communicate.save(path)
-
-def create_audio(slides):
-    script = ". ".join([s["text"] for s in slides])
-
-    path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(tts_async(script, path))
-    loop.close()
-
-    return path
-
-# ---------------------------
-# MERGE AUDIO + VIDEO
-# ---------------------------
-def merge(video, audio):
-    output = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
-
-    cmd = [
-        FFMPEG,
-        "-y",
-        "-i", video,
-        "-i", audio,
-        "-c:v", "copy",
-        "-c:a", "aac",
-        "-shortest",
-        output
-    ]
-
-    subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    return output
-
-# ---------------------------
 # UI
 # ---------------------------
-file = st.file_uploader("Upload transcript", type=["txt"])
+file = st.file_uploader("Upload transcript (.txt)", type=["txt"])
 
 if file:
     text = file.read().decode("utf-8")
 
-    if st.button("Generate Final Video"):
+    if st.button("Generate Summary + Video"):
 
         data = generate_content(text)
-        slides = data["slides"]
 
+        # ---------------------------
+        # SHOW SUMMARY FIRST
+        # ---------------------------
+        st.subheader("📄 Summary")
+        st.write(data.get("summary", ""))
+
+        slides = data.get("slides", [])
+
+        # ---------------------------
+        # GENERATE VIDEO
+        # ---------------------------
         video = create_video(slides)
-        audio = create_audio(slides)
 
-        final = merge(video, audio)
+        st.success("✅ Video Ready!")
+        st.video(video)
 
-        st.success("✅ FINAL VIDEO READY")
-        st.video(final)
