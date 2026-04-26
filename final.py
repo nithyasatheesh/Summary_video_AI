@@ -9,14 +9,13 @@ import edge_tts
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.set_page_config(page_title="AI Video Generator")
-st.title("🎬 Video Generator (Stable + Audio)")
+st.title("🎬 AI Video Generator (Final Fixed)")
 
 # ---------------------------
-# AI CONTENT
+# AI (STRICT SHORT TEXT)
 # ---------------------------
 def generate_content(text):
-    text = text[:2000]
+    text = text[:1500]
 
     try:
         res = client.chat.completions.create(
@@ -27,8 +26,9 @@ def generate_content(text):
 Return JSON only.
 
 RULES:
-- 10 slides
-- max 5 words per slide
+- 18 slides
+- EACH slide = MAX 3 WORDS
+- very simple words
 
 FORMAT:
 {{"slides":[{{"title":"...","text":"..."}}]}}
@@ -40,69 +40,80 @@ TEXT:
         )
 
         raw = res.choices[0].message.content
-        start = raw.find("{")
-        end = raw.rfind("}") + 1
-        return json.loads(raw[start:end])
+        clean = raw[raw.find("{"):raw.rfind("}")+1]
+        return json.loads(clean)
 
     except:
-        return {"slides":[{"title":"Error","text":"Retry"}]}
+        return {"slides":[{"title":"Retry","text":"Try again"}]}
 
 # ---------------------------
-# SLIDE
+# SLIDE (HUGE TEXT FIX)
 # ---------------------------
 def create_slide(title, text):
     img = Image.new("RGB", (1280, 720), "black")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 110)
-        text_font = ImageFont.truetype("DejaVuSans.ttf", 130)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 140)
+        text_font = ImageFont.truetype("DejaVuSans.ttf", 180)
     except:
         title_font = ImageFont.load_default()
         text_font = ImageFont.load_default()
 
-    draw.text((80, 60), title, fill="yellow", font=title_font)
-    draw.text((80, 300), text, fill="white", font=text_font)
+    # center title
+    tb = draw.textbbox((0,0), title, font=title_font)
+    draw.text(((1280-tb[2])//2, 80), title, fill="yellow", font=title_font)
+
+    # center text
+    bb = draw.textbbox((0,0), text, font=text_font)
+    draw.text(((1280-bb[2])//2, 320), text, fill="white", font=text_font)
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# VIDEO
+# VIDEO (FORCE 4 MIN)
 # ---------------------------
 def create_video(slides):
     video_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
     writer = imageio.get_writer(video_path, fps=1)
 
+    total_target = 240  # 4 minutes
+    per_slide = total_target // len(slides)
+
     for slide in slides:
         img = create_slide(slide["title"], slide["text"])
         frame = imageio.imread(img)
 
-        for _ in range(10):  # duration
+        for _ in range(per_slide):
             writer.append_data(frame)
 
     writer.close()
     return video_path
 
 # ---------------------------
-# AUDIO
+# AUDIO (FIXED PLAYBACK)
 # ---------------------------
 async def tts_async(text, path):
-    communicate = edge_tts.Communicate(text=text, voice="en-US-JennyNeural")
+    communicate = edge_tts.Communicate(
+        text=text,
+        voice="en-US-JennyNeural",
+        rate="-10%"
+    )
     await communicate.save(path)
 
 def create_audio(slides):
     script = ". ".join([s["text"] for s in slides])
 
-    audio_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
+    path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(tts_async(script, audio_path))
+    loop.run_until_complete(tts_async(script, path))
     loop.close()
 
-    return audio_path
+    return path
 
 # ---------------------------
 # UI
@@ -114,18 +125,16 @@ if file:
 
     if st.button("Generate"):
 
-        with st.spinner("Processing..."):
+        data = generate_content(text)
+        slides = data.get("slides", [])
 
-            data = generate_content(text)
-            slides = data.get("slides", [])
+        video = create_video(slides)
+        audio = create_audio(slides)
 
-            video = create_video(slides)
-            audio = create_audio(slides)
+        st.success("✅ Generated!")
 
-            st.success("✅ Done!")
+        st.video(video)
 
-            st.video(video)
-
-            st.subheader("🔊 Audio Narration")
-            st.audio(audio)
+        st.warning("🔊 Click below to play audio (browser blocks autoplay)")
+        st.audio(audio)
 
