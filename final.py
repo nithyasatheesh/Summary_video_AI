@@ -5,146 +5,99 @@ import imageio.v2 as imageio
 from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
 
-# ---------------------------
-# INIT
-# ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.set_page_config(page_title="AI Video Generator")
-st.title("🎬 AI Video Generator (Clean + Big Text)")
+st.set_page_config(page_title="YouTube Video Generator")
+st.title("🎬 Transcript → YouTube-Style Video")
 
 # ---------------------------
-# AI (SAFE)
+# 🧠 AI GENERATION
 # ---------------------------
-def generate_all(text):
-    try:
-        res = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{
-                "role": "user",
-                "content": f"""
-Create slides.
+def generate_content(text):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{
+            "role": "user",
+            "content": f"""
+Create a YouTube-style explanation.
+
+STRUCTURE:
+1. Hook (1 slide)
+2. Main content (8–10 slides)
+3. Recap (1 slide)
 
 RULES:
-- 6 slides
-- 2 short points per slide
-- very simple language
+- Each slide = 1 short sentence
+- Max 8 words
+- Very simple language
+- Engaging and clear
 
 Return JSON:
 {{
  "summary": "...",
  "slides":[
-  {{"title":"...","points":["...","..."]}}
+  {{"title":"...","text":"..."}}
  ]
 }}
 
 TEXT:
 {text}
 """
-            }]
-        )
+        }]
+    )
 
-        raw = res.choices[0].message.content
-        data = json.loads(raw)
-
-        if not data.get("slides"):
-            raise ValueError("No slides")
-
-        return data
-
+    try:
+        return json.loads(response.choices[0].message.content)
     except:
         return {
-            "summary": "Fallback summary",
+            "summary": "Could not generate summary",
             "slides": [
-                {
-                    "title": "Sample Slide",
-                    "points": ["Content failed", "Please try again"]
-                }
+                {"title": "Error", "text": "Try again"}
             ]
         }
 
 # ---------------------------
-# SLIDE DESIGN (BIG + CLEAN)
+# 🎨 SLIDE DESIGN
 # ---------------------------
-def create_slide(title, points):
-    img = Image.new("RGB", (1280, 720), "#f8fafc")
+def create_slide(title, text):
+    img = Image.new("RGB", (1280, 720), "#0f172a")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 90)
-        point_font = ImageFont.truetype("DejaVuSans.ttf", 60)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 80)
+        text_font = ImageFont.truetype("DejaVuSans.ttf", 70)
     except:
         title_font = ImageFont.load_default()
-        point_font = ImageFont.load_default()
+        text_font = ImageFont.load_default()
 
-    # Center title
+    # Title
     bbox = draw.textbbox((0, 0), title, font=title_font)
-    draw.text(((1280 - bbox[2]) / 2, 80), title, fill="#111", font=title_font)
+    draw.text(((1280 - bbox[2]) / 2, 100), title, fill="white", font=title_font)
 
-    # Divider
-    draw.line((150, 200, 1130, 200), fill="#ccc", width=4)
-
-    y = 260
-
-    for p in points:
-        words = p.split()
-        lines = []
-        line = ""
-
-        for word in words:
-            test = line + word + " "
-            if point_font.getbbox(test)[2] < 900:
-                line = test
-            else:
-                lines.append(line)
-                line = word + " "
-        lines.append(line)
-
-        for line in lines:
-            bbox = draw.textbbox((0, 0), line, font=point_font)
-            draw.text(((1280 - bbox[2]) / 2, y), line.strip(), fill="#222", font=point_font)
-            y += 80
-
-        y += 30
+    # Text
+    bbox = draw.textbbox((0, 0), text, font=text_font)
+    draw.text(((1280 - bbox[2]) / 2, 350), text, fill="#38bdf8", font=text_font)
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# VIDEO GENERATION (FIXED)
+# 🎥 VIDEO GENERATION
 # ---------------------------
 def generate_video(slides):
-    if not slides:
-        st.error("No slides found")
-        return None
-
     video_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
     writer = imageio.get_writer(video_path, fps=1)
 
-    frame_count = 0
-
-    for i, slide in enumerate(slides):
-        st.write(f"Slide {i+1}/{len(slides)}")
-
-        img = create_slide(
-            slide.get("title", "Untitled"),
-            slide.get("points", ["No content"])
-        )
-
+    for slide in slides:
+        img = create_slide(slide["title"], slide["text"])
         frame = imageio.imread(img)
 
-        # Force duration (2 sec per slide)
-        for _ in range(2):
+        # ~10 sec per slide → 3–4 min total
+        for _ in range(8):
             writer.append_data(frame)
-            frame_count += 1
 
     writer.close()
-
-    if frame_count == 0:
-        st.error("Video empty")
-        return None
-
     return video_path
 
 # ---------------------------
@@ -157,18 +110,17 @@ if file:
 
     if st.button("Generate Video"):
 
-        data = generate_all(text)
+        with st.spinner("Creating YouTube-style video..."):
 
-        st.subheader("Summary")
-        st.write(data.get("summary", ""))
+            data = generate_content(text)
 
-        slides = data.get("slides", [])
-        st.write("Slides:", len(slides))
+            st.subheader("📄 Summary")
+            st.write(data.get("summary", ""))
 
-        video = generate_video(slides)
+            slides = data.get("slides", [])
 
-        if video:
+            video = generate_video(slides)
+
             st.success("✅ Video Ready!")
             st.video(video)
-        else:
-            st.error("❌ Failed to generate video")
+
