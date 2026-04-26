@@ -5,9 +5,9 @@ import asyncio
 
 from openai import OpenAI
 import edge_tts
-from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
-from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
+from PIL import Image, ImageDraw, ImageFont
+import imageio_ffmpeg  # ensures ffmpeg is available
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
 st.title("🎬 Transcript → Video Generator")
@@ -26,7 +26,7 @@ def call_ai(prompt):
     return res.choices[0].message.content
 
 # ---------------------------
-# ✂️ SPLIT TEXT (OPTIMIZED)
+# ✂️ SPLIT TEXT
 # ---------------------------
 def split_text(text, size=6000):
     return [text[i:i+size] for i in range(0, len(text), size)]
@@ -35,9 +35,7 @@ def split_text(text, size=6000):
 # 🧠 FAST CHUNK SUMMARY
 # ---------------------------
 def summarize_chunks(text):
-    chunks = split_text(text)
-    chunks = chunks[:8]  # 🔥 limit for speed
-
+    chunks = split_text(text)[:8]  # limit for speed
     summaries = []
 
     for i, chunk in enumerate(chunks):
@@ -45,10 +43,7 @@ def summarize_chunks(text):
 
         s = call_ai(f"""
 Extract key concepts only.
-
-Rules:
-- Keep it short
-- No long explanation
+Keep it short.
 
 TEXT:
 {chunk}
@@ -58,21 +53,18 @@ TEXT:
     return "\n".join(summaries)
 
 # ---------------------------
-# 🧠 FINAL CONTENT (5 MIN VIDEO)
+# 🧠 FINAL CONTENT
 # ---------------------------
 def generate_all(text):
     raw = call_ai(f"""
 You are a teacher.
 
-GOAL:
 Create a 5-minute video script.
 
 RULES:
 - Use ALL key concepts
-- Explanation length: 600–900 words
-
-SLIDES:
-- 6 to 8 slides
+- 600–900 words total
+- 6–8 slides
 - Each explanation: 80–120 words
 
 RETURN JSON:
@@ -129,7 +121,7 @@ def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
     try:
         asyncio.run(tts_async(text, path))
-    except:
+    except RuntimeError:
         loop = asyncio.new_event_loop()
         loop.run_until_complete(tts_async(text, path))
     return path
@@ -146,8 +138,10 @@ def generate_video(slides):
             audio = generate_audio(slide["explanation"])
 
             audio_clip = AudioFileClip(audio)
-            clip = ImageClip(img).with_duration(audio_clip.duration)
-            clip = clip.with_audio(audio_clip)
+
+            # FIXED duration handling
+            clip = ImageClip(img, duration=audio_clip.duration)
+            clip = clip.set_audio(audio_clip)
 
             clips.append(clip)
 
@@ -188,10 +182,10 @@ if st.button("Generate Video"):
     texts = [f.read().decode("utf-8") for f in files]
     merged = "\n\n".join(texts)
 
-    st.write("⚡ Step 1: Fast chunk processing...")
+    st.write("⚡ Step 1: Processing...")
     chunk_summary = summarize_chunks(merged)
 
-    st.write("🧠 Step 2: Generating video content...")
+    st.write("🧠 Step 2: Generating content...")
     data = generate_all(chunk_summary)
 
     if not data:
