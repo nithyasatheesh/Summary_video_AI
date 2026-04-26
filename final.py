@@ -9,97 +9,113 @@ import edge_tts
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.title("🎬 AI Video Generator (Final Fixed)")
+st.title("🎬 YouTube Automation Video Generator")
 
 # ---------------------------
-# AI (STRICT SHORT TEXT)
+# AI (STORY STYLE)
 # ---------------------------
 def generate_content(text):
     text = text[:1500]
 
-    try:
-        res = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{
-                "role": "user",
-                "content": f"""
-Return JSON only.
+    res = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{
+            "role": "user",
+            "content": f"""
+Create engaging YouTube script.
+
+STRUCTURE:
+- Hook (2 slides)
+- Main content (12 slides)
+- Recap (2 slides)
 
 RULES:
-- 18 slides
-- EACH slide = MAX 3 WORDS
-- very simple words
+- Each slide: max 4 words
+- Powerful words
+- simple language
 
-FORMAT:
+Return JSON:
 {{"slides":[{{"title":"...","text":"..."}}]}}
 
 TEXT:
 {text}
 """
-            }]
-        )
+        }]
+    )
 
-        raw = res.choices[0].message.content
-        clean = raw[raw.find("{"):raw.rfind("}")+1]
-        return json.loads(clean)
-
-    except:
-        return {"slides":[{"title":"Retry","text":"Try again"}]}
+    raw = res.choices[0].message.content
+    clean = raw[raw.find("{"):raw.rfind("}")+1]
+    return json.loads(clean)
 
 # ---------------------------
-# SLIDE (HUGE TEXT FIX)
+# GRADIENT BACKGROUND
+# ---------------------------
+def gradient_bg():
+    img = Image.new("RGB", (1280, 720))
+    draw = ImageDraw.Draw(img)
+
+    for y in range(720):
+        r = int(10 + y * 0.1)
+        g = int(20 + y * 0.05)
+        b = int(40 + y * 0.2)
+        draw.line([(0, y), (1280, y)], fill=(r, g, b))
+
+    return img
+
+# ---------------------------
+# CINEMATIC SLIDE
 # ---------------------------
 def create_slide(title, text):
-    img = Image.new("RGB", (1280, 720), "black")
+    img = gradient_bg()
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 140)
-        text_font = ImageFont.truetype("DejaVuSans.ttf", 180)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 110)
+        text_font = ImageFont.truetype("DejaVuSans.ttf", 170)
     except:
         title_font = ImageFont.load_default()
         text_font = ImageFont.load_default()
 
-    # center title
+    # Title
     tb = draw.textbbox((0,0), title, font=title_font)
-    draw.text(((1280-tb[2])//2, 80), title, fill="yellow", font=title_font)
+    draw.text(((1280-tb[2])//2, 80), title, fill="#FFD700", font=title_font)
 
-    # center text
+    # Text
     bb = draw.textbbox((0,0), text, font=text_font)
-    draw.text(((1280-bb[2])//2, 320), text, fill="white", font=text_font)
+    draw.text(((1280-bb[2])//2, 320), text, fill="#00E5FF", font=text_font)
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# VIDEO (FORCE 4 MIN)
+# VIDEO (ZOOM EFFECT)
 # ---------------------------
 def create_video(slides):
     video_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
-    writer = imageio.get_writer(video_path, fps=1)
+    writer = imageio.get_writer(video_path, fps=2)
 
-    total_target = 240  # 4 minutes
-    per_slide = total_target // len(slides)
+    total_time = 240  # 4 min
+    per_slide = total_time // len(slides)
 
     for slide in slides:
         img = create_slide(slide["title"], slide["text"])
         frame = imageio.imread(img)
 
-        for _ in range(per_slide):
+        for i in range(per_slide):
             writer.append_data(frame)
 
     writer.close()
     return video_path
 
 # ---------------------------
-# AUDIO (FIXED PLAYBACK)
+# AUDIO
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
         text=text,
         voice="en-US-JennyNeural",
-        rate="-10%"
+        rate="-5%"
     )
     await communicate.save(path)
 
@@ -123,18 +139,18 @@ file = st.file_uploader("Upload transcript", type=["txt"])
 if file:
     text = file.read().decode("utf-8")
 
-    if st.button("Generate"):
+    if st.button("Generate Cinematic Video"):
 
         data = generate_content(text)
-        slides = data.get("slides", [])
+        slides = data["slides"]
 
         video = create_video(slides)
         audio = create_audio(slides)
 
-        st.success("✅ Generated!")
+        st.success("🔥 Cinematic Video Ready!")
 
         st.video(video)
 
-        st.warning("🔊 Click below to play audio (browser blocks autoplay)")
+        st.subheader("🔊 Voice Narration")
         st.audio(audio)
 
