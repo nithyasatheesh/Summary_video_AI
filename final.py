@@ -1,6 +1,5 @@
 import streamlit as st
 import tempfile
-import json
 import asyncio
 
 import edge_tts
@@ -11,46 +10,65 @@ from openai import OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(page_title="AI Video Generator")
-st.title("🎬 3–5 Min AI Video Generator")
+st.title("🎬 Stable AI Video Generator")
 
 # ---------------------------
-# AI
+# 🧠 STRUCTURED AI CALL
 # ---------------------------
-def call_ai(prompt):
-    res = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return res.choices[0].message.content
-
-def clean_json(text):
-    try:
-        return text[text.find("{"):text.rfind("}")+1]
-    except:
-        return "{}"
-
 def generate_all(text):
-    raw = call_ai(f"""
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "user",
+                "content": f"""
 Create explanation slides.
 
 RULES:
 - 15 slides
 - 2 points per slide
-- short sentences
-- explanation: 2 sentences
+- short simple sentences
 
-Return JSON.
+Return JSON ONLY.
 TEXT:
 {text}
-""")
+"""
+            }
+        ],
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "slides_schema",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "summary": {"type": "string"},
+                        "slides": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string"},
+                                    "points": {
+                                        "type": "array",
+                                        "items": {"type": "string"}
+                                    },
+                                    "explanation": {"type": "string"}
+                                },
+                                "required": ["title", "points", "explanation"]
+                            }
+                        }
+                    },
+                    "required": ["slides"]
+                }
+            }
+        }
+    )
 
-    try:
-        return json.loads(clean_json(raw))
-    except:
-        return {"summary": "", "slides": []}
+    return response.choices[0].message.parsed
 
 # ---------------------------
-# SLIDE DESIGN
+# 🎨 SLIDE DESIGN
 # ---------------------------
 def create_slide(title, points):
     img = Image.new("RGB", (1280, 720), "#f8fafc")
@@ -63,11 +81,11 @@ def create_slide(title, points):
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    draw.text((100, 60), str(title), fill="#111", font=title_font)
+    draw.text((100, 60), title, fill="#111", font=title_font)
 
     y = 220
     for p in points:
-        draw.text((120, y), str(p), fill="#222", font=point_font)
+        draw.text((120, y), p, fill="#222", font=point_font)
         y += 70
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
@@ -75,7 +93,7 @@ def create_slide(title, points):
     return path
 
 # ---------------------------
-# TTS (SAFE LOOP)
+# 🔊 TTS
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
@@ -96,7 +114,7 @@ def generate_audio(text):
     return path
 
 # ---------------------------
-# VIDEO CLIP (SAFE)
+# 🎬 CLIP
 # ---------------------------
 def create_clip(img_path, audio_path):
     audio = AudioFileClip(audio_path)
@@ -108,7 +126,7 @@ def create_clip(img_path, audio_path):
     return clip
 
 # ---------------------------
-# VIDEO GENERATION
+# 🎥 VIDEO
 # ---------------------------
 def generate_video(slides):
     clips = []
@@ -116,17 +134,14 @@ def generate_video(slides):
     for i, slide in enumerate(slides):
         st.write(f"Slide {i+1}/{len(slides)}")
 
-        title = slide.get("title", "Untitled")
-        points = slide.get("points", ["No content"])
-        explanation = slide.get("explanation", "")
+        img = create_slide(
+            slide.get("title", "Untitled"),
+            slide.get("points", [])
+        )
 
-        img = create_slide(title, points)
-        audio = generate_audio(explanation)
+        audio = generate_audio(slide.get("explanation", ""))
 
         clips.append(create_clip(img, audio))
-
-    if not clips:
-        raise Exception("No clips generated")
 
     final = concatenate_videoclips(clips)
 
@@ -151,11 +166,10 @@ if st.button("Generate Video"):
 
     data = generate_all(merged)
 
-    st.write("DEBUG:", data)  # helpful debug
+    st.subheader("Summary")
+    st.write(data.get("summary", ""))
 
-    try:
-        video = generate_video(data.get("slides", []))
-        st.video(video)
-    except Exception as e:
-        st.error(f"Error: {e}")
+    video = generate_video(data.get("slides", []))
+
+    st.video(video)
 
