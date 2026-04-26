@@ -4,10 +4,13 @@ import json
 import asyncio
 
 import edge_tts
-from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
+from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
 
+# ---------------------------
+# INIT
+# ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
@@ -52,7 +55,12 @@ Return JSON only:
 TEXT:
 {text}
 """)
-    return json.loads(clean_json(raw))
+    try:
+        return json.loads(clean_json(raw))
+    except Exception as e:
+        st.error("❌ AI response parsing failed")
+        st.text(raw)
+        raise e
 
 # ---------------------------
 # FONTS
@@ -117,7 +125,7 @@ def create_slide(title, points):
     return path
 
 # ---------------------------
-# TTS
+# TTS (SAFE ASYNC)
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
@@ -130,22 +138,25 @@ async def tts_async(text, path):
 
 def generate_audio(text):
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-    asyncio.run(tts_async(text, path))
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(tts_async(text, path))
+    loop.close()
+
     return path
 
 # ---------------------------
-# VIDEO CLIP (Zoom Effect)
+# VIDEO CLIP
 # ---------------------------
 def create_clip(img_path, audio_path):
     audio = AudioFileClip(audio_path)
     duration = max(audio.duration, 10)
 
-    clip = (
-        ImageClip(img_path)
-        .with_duration(duration)
-        .resize(lambda t: 1 + 0.02 * t)  # subtle zoom
-        .with_audio(audio)
-    )
+    clip = ImageClip(img_path).set_duration(duration)
+    clip = clip.resize(lambda t: 1 + 0.02 * t)  # zoom effect
+    clip = clip.set_audio(audio)
+
     return clip
 
 # ---------------------------
@@ -154,7 +165,9 @@ def create_clip(img_path, audio_path):
 def generate_video(slides):
     clips = []
 
-    for slide in slides:
+    for i, slide in enumerate(slides):
+        st.write(f"🎞️ Processing slide {i+1}/{len(slides)}")
+
         img = create_slide(slide["title"], slide["points"])
         audio = generate_audio(slide["explanation"])
 
@@ -196,10 +209,20 @@ if st.button("Generate Video"):
 
         data = generate_all(merged)
 
-        st.subheader("📄 Summary")
-        st.write(data["summary"])
+        # Debug (optional)
+        if "slides" not in data:
+            st.error("❌ No slides returned from AI")
+            st.stop()
 
-        video = generate_video(data["slides"])
+        st.subheader("📄 Summary")
+        st.write(data.get("summary", ""))
+
+        try:
+            video = generate_video(data["slides"])
+        except Exception as e:
+            st.error(f"❌ Video generation failed: {e}")
+            st.stop()
 
         st.success("✅ Video Ready!")
         st.video(video)
+
