@@ -8,29 +8,26 @@ from openai import OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(page_title="YouTube Video Generator")
-st.title("🎬 Transcript → YouTube-Style Video")
+st.title("🎬 3–5 Min AI Video Generator")
 
 # ---------------------------
-# 🧠 AI GENERATION
+# AI CONTENT (LESS TEXT = BIG FONT)
 # ---------------------------
 def generate_content(text):
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{
-            "role": "user",
-            "content": f"""
-Create a YouTube-style explanation.
-
-STRUCTURE:
-1. Hook (1 slide)
-2. Main content (8–10 slides)
-3. Recap (1 slide)
+    try:
+        res = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{
+                "role": "user",
+                "content": f"""
+Create YouTube-style slides.
 
 RULES:
+- 15–18 slides
 - Each slide = 1 short sentence
-- Max 8 words
-- Very simple language
-- Engaging and clear
+- Max 6 words per sentence
+- Very simple words
+- Include intro + recap
 
 Return JSON:
 {{
@@ -43,58 +40,79 @@ Return JSON:
 TEXT:
 {text}
 """
-        }]
-    )
+            }]
+        )
 
-    try:
-        return json.loads(response.choices[0].message.content)
+        return json.loads(res.choices[0].message.content)
+
     except:
         return {
-            "summary": "Could not generate summary",
-            "slides": [
-                {"title": "Error", "text": "Try again"}
-            ]
+            "summary": "Error generating content",
+            "slides": [{"title": "Error", "text": "Try again"}]
         }
 
 # ---------------------------
-# 🎨 SLIDE DESIGN
+# BIG VISUAL SLIDE
 # ---------------------------
 def create_slide(title, text):
     img = Image.new("RGB", (1280, 720), "#0f172a")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 80)
-        text_font = ImageFont.truetype("DejaVuSans.ttf", 70)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 95)
+        text_font = ImageFont.truetype("DejaVuSans.ttf", 80)
     except:
         title_font = ImageFont.load_default()
         text_font = ImageFont.load_default()
 
-    # Title
+    # TITLE (TOP CENTER)
     bbox = draw.textbbox((0, 0), title, font=title_font)
-    draw.text(((1280 - bbox[2]) / 2, 100), title, fill="white", font=title_font)
+    draw.text(((1280 - bbox[2]) / 2, 80), title, fill="#f8fafc", font=title_font)
 
-    # Text
-    bbox = draw.textbbox((0, 0), text, font=text_font)
-    draw.text(((1280 - bbox[2]) / 2, 350), text, fill="#38bdf8", font=text_font)
+    # MAIN TEXT (CENTER BIG)
+    words = text.split()
+    lines, line = [], ""
+
+    for w in words:
+        test = line + w + " "
+        if text_font.getbbox(test)[2] < 1000:
+            line = test
+        else:
+            lines.append(line)
+            line = w + " "
+    lines.append(line)
+
+    y = 300
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=text_font)
+        draw.text(((1280 - bbox[2]) / 2, y), line.strip(), fill="#38bdf8", font=text_font)
+        y += 100
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# 🎥 VIDEO GENERATION
+# VIDEO (FORCED 3–5 MIN)
 # ---------------------------
 def generate_video(slides):
     video_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
     writer = imageio.get_writer(video_path, fps=1)
 
-    for slide in slides:
+    total_slides = len(slides)
+
+    # 🔥 target 3–5 minutes → 180–300 sec
+    target_duration = 240  # 4 minutes
+
+    duration_per_slide = max(10, target_duration // total_slides)
+
+    for i, slide in enumerate(slides):
+        st.write(f"Slide {i+1}/{total_slides}")
+
         img = create_slide(slide["title"], slide["text"])
         frame = imageio.imread(img)
 
-        # ~10 sec per slide → 3–4 min total
-        for _ in range(8):
+        for _ in range(duration_per_slide):
             writer.append_data(frame)
 
     writer.close()
@@ -110,7 +128,7 @@ if file:
 
     if st.button("Generate Video"):
 
-        with st.spinner("Creating YouTube-style video..."):
+        with st.spinner("🎬 Generating 3–5 min video..."):
 
             data = generate_content(text)
 
