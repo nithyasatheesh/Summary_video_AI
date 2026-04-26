@@ -13,94 +13,105 @@ from openai import OpenAI
 # ---------------------------
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-st.set_page_config(page_title="Fast AI Video Generator", layout="centered")
-st.title("⚡ AI Transcript → Video Generator")
+st.set_page_config(page_title="AI Video Generator", layout="centered")
+st.title("🎬 AI Transcript → 3–5 Min Video Generator")
 
 # ---------------------------
-# 🤖 OPENAI CALL
+# AI
 # ---------------------------
 def call_ai(prompt):
-    response = client.chat.completions.create(
+    res = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
+        messages=[{"role": "user", "content": prompt}]
     )
-    return response.choices[0].message.content
+    return res.choices[0].message.content
 
-# ---------------------------
-# 🧹 CLEAN JSON
-# ---------------------------
 def clean_json(text):
-    start = text.find("{")
-    end = text.rfind("}") + 1
-    return text[start:end]
+    return text[text.find("{"):text.rfind("}")+1]
 
-# ---------------------------
-# 🧠 GENERATE CONTENT
-# ---------------------------
 def generate_all(text):
     raw = call_ai(f"""
-Create summary + slides.
+Create a YouTube-style explanation.
 
 STRICT:
-- 10 slides
-- Max 3 bullet points per slide
-- Simple language
+- 15 to 20 slides
+- Each slide = max 2 points
+- Each point max 8 words
+- Explanation = 2 short spoken sentences
+- Keep language VERY simple
 
 Return JSON only:
 {{
-  "summary": "...",
-  "slides": [
-    {{
-      "title": "...",
-      "points": ["...", "..."],
-      "explanation": "..."
-    }}
-  ]
+ "summary": "...",
+ "slides": [
+   {{
+     "title": "...",
+     "points": ["...", "..."],
+     "explanation": "..."
+   }}
+ ]
 }}
 
 TEXT:
 {text}
 """)
-
-    try:
-        return json.loads(clean_json(raw))
-    except:
-        st.error("AI JSON failed")
-        st.text(raw)
-        st.stop()
+    return json.loads(clean_json(raw))
 
 # ---------------------------
-# 🎨 CREATE SLIDE
+# SLIDE DESIGN (BIG + CLEAN)
 # ---------------------------
 def create_slide(title, points):
-    img = Image.new("RGB", (854, 480), "white")
+    img = Image.new("RGB", (1280, 720), "#f8fafc")
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 40)
-        point_font = ImageFont.truetype("DejaVuSans.ttf", 25)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 70)
+        point_font = ImageFont.truetype("DejaVuSans.ttf", 48)
     except:
         title_font = ImageFont.load_default()
         point_font = ImageFont.load_default()
 
-    draw.text((40, 20), title, fill="black", font=title_font)
+    # Center title
+    bbox = draw.textbbox((0, 0), title, font=title_font)
+    draw.text(((1280 - bbox[2]) / 2, 60), title, fill="#111", font=title_font)
 
-    y = 100
+    draw.line((150, 160, 1130, 160), fill="#ccc", width=4)
+
+    y = 220
+
     for p in points:
-        draw.text((60, y), f"• {p}", fill="black", font=point_font)
-        y += 40
+        words = p.split()
+        lines, line = [], ""
+
+        for word in words:
+            test = line + word + " "
+            if point_font.getbbox(test)[2] < 900:
+                line = test
+            else:
+                lines.append(line)
+                line = word + " "
+        lines.append(line)
+
+        for line in lines:
+            bbox = draw.textbbox((0, 0), line, font=point_font)
+            draw.text(((1280 - bbox[2]) / 2, y), line.strip(), fill="#222", font=point_font)
+            y += 65
+
+        y += 20
 
     path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
     img.save(path)
     return path
 
 # ---------------------------
-# 🔊 TTS
+# TTS (NATURAL)
 # ---------------------------
 async def tts_async(text, path):
     communicate = edge_tts.Communicate(
-        text=text[:150],
-        voice="en-US-AriaNeural"
+        text=text[:250],
+        voice="en-US-JennyNeural",
+        rate="-5%",
+        pitch="+2Hz"
     )
     await communicate.save(path)
 
@@ -115,19 +126,22 @@ def generate_audio(text):
     return path
 
 # ---------------------------
-# 🎬 CLIP
+# CLIP
 # ---------------------------
 def create_clip(img_path, audio_path):
     audio = AudioFileClip(audio_path)
-    duration = max(audio.duration, 5)
+
+    # Ensure minimum duration
+    duration = max(audio.duration, 10)
 
     clip = ImageClip(img_path).set_duration(duration)
+    clip = clip.resize(lambda t: 1 + 0.015 * t)  # zoom
     clip = clip.set_audio(audio)
 
     return clip
 
 # ---------------------------
-# 🎥 VIDEO
+# VIDEO
 # ---------------------------
 def generate_video(slides):
     clips = []
@@ -135,12 +149,12 @@ def generate_video(slides):
     for i, slide in enumerate(slides):
         st.write(f"Slide {i+1}/{len(slides)}")
 
-        title = slide.get("title", "Untitled")
-        points = slide.get("points", [])
-        explanation = slide.get("explanation", "")
+        img = create_slide(
+            slide.get("title", "Untitled"),
+            slide.get("points", [])
+        )
 
-        img = create_slide(title, points)
-        audio = generate_audio(explanation)
+        audio = generate_audio(slide.get("explanation", ""))
 
         clips.append(create_clip(img, audio))
 
@@ -149,9 +163,10 @@ def generate_video(slides):
     output = "final_video.mp4"
     final.write_videofile(
         output,
-        fps=12,
-        preset="ultrafast",
-        threads=2
+        fps=24,
+        codec="libx264",
+        audio_codec="aac",
+        bitrate="3000k"
     )
 
     return output
@@ -160,7 +175,7 @@ def generate_video(slides):
 # UI
 # ---------------------------
 files = st.file_uploader(
-    "Upload transcript files",
+    "Upload transcript",
     type=["txt"],
     accept_multiple_files=True
 )
@@ -171,14 +186,14 @@ if st.button("Generate Video"):
         st.warning("Upload files first")
         st.stop()
 
-    with st.spinner("⚡ Generating..."):
+    with st.spinner("🎬 Generating 3–5 min video..."):
 
         texts = [f.read().decode("utf-8") for f in files]
         merged = "\n\n".join(texts)
 
         data = generate_all(merged)
 
-        st.subheader("📄 Summary")
+        st.subheader("Summary")
         st.write(data.get("summary", ""))
 
         video = generate_video(data.get("slides", []))
