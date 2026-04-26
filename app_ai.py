@@ -10,9 +10,9 @@ from PIL import Image, ImageDraw, ImageFont
 import imageio_ffmpeg
 
 st.set_page_config(page_title="AI Video Generator", layout="centered")
-st.title("🎬 Transcript → Video Generator")
+st.title("🎬 Transcript →Summary Video Generator")
 
-st.write("🔑 API KEY LOADED:", "OPENAI_API_KEY" in st.secrets)
+#st.write("🔑 API KEY LOADED:", "OPENAI_API_KEY" in st.secrets)
 
 client = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY"))
 
@@ -222,7 +222,7 @@ files = st.file_uploader(
 
 if st.button("Generate Video"):
 
-    st.write("🚀 Button clicked")
+    #st.write("🚀 Button clicked")
 
     if not files:
         st.warning("Upload files")
