@@ -1,7 +1,7 @@
 streamlit
 pillow
 edge-tts
-moviepy==1.0.3
+moviepy
 imageio
 imageio-ffmpeg
 openai
