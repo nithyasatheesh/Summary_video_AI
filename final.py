@@ -36,7 +36,7 @@ Return JSON only:
 
 RULES:
 - 10 slides
-- each slide: 1 short sentence (8–12 words)
+- each slide: 2 short sentence (8–12 words)
 - clear explanation
 - simple language
 
@@ -73,7 +73,7 @@ def load_font(size):
 # AUTO FONT SCALE
 # ---------------------------
 def get_best_font(draw, text):
-    for size in range(180, 40, -5):
+    for size in range(500, 40, -5):
         font = load_font(size)
         bbox = draw.textbbox((0,0), text, font=font)
 
